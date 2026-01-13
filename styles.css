@@ -38,4 +38,11 @@ pre {
   overflow: auto;
 }
 
+df-messenger {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 999999;
+}
+
 .muted { color: #666; font-size: 13px; }

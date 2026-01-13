@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DF Messenger Demo (params)</title>
+
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Dialogflow Messenger library (一定要先載入) -->
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
+  <!-- 你自己嘅 JS（defer 會等 HTML parse 完先跑） -->
+  <script defer src="./app.js"></script>
+</head>
+
+<body>
+  <h2>Dialogflow CX Messenger Demo (dropdown params)</h2>
+
+  <div class="panel">
+    <div class="row">
+      <label>
+        Region
+        <select id="region">
+          <option value="APAC">APAC</option>
+          <option value="EMEA">EMEA</option>
+          <option value="AMER">AMER</option>
+        </select>
+      </label>
+
+      <label>
+        Country Code
+        <select id="countryCode">
+          <option value="HK">HK</option>
+          <option value="JP">JP</option>
+          <option value="SG">SG</option>
+          <option value="US">US</option>
+          <option value="GB">GB</option>
+        </select>
+      </label>
+
+      <label>
+        userId (optional)
+        <input id="userId" placeholder="e.g. u_12345" />
+      </label>
+    </div>
+
+    <div class="row">
+      <button id="applyBtn" disabled>Apply parameters</button>
+      <button id="newSessionBtn" disabled>Start new session</button>
+      <button id="sendHelloBtn" disabled>Send “hello”</button>
+    </div>
+
+    <p class="muted">
+      Apply 只係「設定 session parameters」，唔會令 bot 即刻講嘢；要觸發回覆可以按 Send “hello”。
+    </p>
+
+    <h4>Current parameters</h4>
+    <pre id="out">{}</pre>
+  </div>
+
+  <!-- 你個 chatbot -->
+  <df-messenger
+    project-id="viu-pmo-poc"
+    location="global"
+    agent-id="d2fb0084-cb90-4de0-a8f1-caaed8f85603"
+    language-code="en">
+    <df-messenger-chat-bubble chat-title="Demo Bot"></df-messenger-chat-bubble>
+  </df-messenger>
+</body>
+</html>

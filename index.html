@@ -3,23 +3,58 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DF Messenger Demo (Language/Region + Device/Browser)</title>
+  <title>DF Messenger Demo – Missing Region Simulation</title>
 
+  <!-- Default DF theme -->
   <link rel="stylesheet"
     href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+
+  <!-- DF Messenger -->
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 24px; }
-    .panel { max-width: 920px; padding: 16px; border: 1px solid #ddd; border-radius: 12px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; margin-bottom: 12px; }
-    label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
-    select, input, button { padding: 8px 10px; font-size: 14px; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      margin: 24px;
+    }
+    .panel {
+      max-width: 900px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+    }
+    select, input, button {
+      padding: 8px 10px;
+      font-size: 14px;
+    }
     button { cursor: pointer; }
-    pre { background: #f7f7f7; padding: 12px; border-radius: 8px; overflow: auto; max-height: 320px; }
-    .muted { color: #666; font-size: 13px; line-height: 1.4; }
+    pre {
+      background: #f7f7f7;
+      padding: 12px;
+      border-radius: 8px;
+      overflow: auto;
+      max-height: 300px;
+    }
+    .muted {
+      color: #666;
+      font-size: 13px;
+      line-height: 1.4;
+    }
 
-    /* Pin chatbot bottom-right + keep window in bounds */
+    /* Pin chatbot bottom-right */
     df-messenger-chat-bubble {
       position: fixed !important;
       right: 16px !important;
@@ -38,7 +73,7 @@
 </head>
 
 <body>
-  <h2>ChatBot Demo</h2>
+  <h2>ChatBot Demo – Missing Region Simulation</h2>
 
   <div class="panel">
     <div class="row">
@@ -59,15 +94,19 @@
         </select>
       </label>
 
+      <label style="flex-direction: row; align-items: center; gap: 8px;">
+        <input type="checkbox" id="omitRegion" />
+        Simulate: frontend can’t get region
+      </label>
+
       <button id="applyBtn">Apply parameters</button>
-      <button id="newSessionBtn">Start new session</button>
       <button id="sendHelloBtn">Send “hello”</button>
     </div>
 
     <p class="muted">
-      Apply parameters → sets session parameters (language/region + device/browser/page).<br/>
-      Start new session → clears history and starts a fresh session (useful when testing parameter changes).<br/>
-      Send “hello” → triggers an immediate reply.
+      ✔ If <b>Simulate: frontend can’t get region</b> is checked → <b>region is NOT sent at all</b>.<br/>
+      ✔ CX should detect <code>$session.params.region = null</code> and ask user.<br/>
+      ✔ Apply = setQueryParameters(), Send = sendQuery().
     </p>
 
     <h4>Parameters that will be sent</h4>
@@ -90,56 +129,21 @@
   <script>
     const $ = (id) => document.getElementById(id);
 
-    function isMobile() {
-      return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-    }
-
-    async function getBrowserInfo() {
-      // Prefer UA-CH if available, fallback to userAgent
-      const ua = navigator.userAgent || "";
-      let browserBrand = "";
-      let browserVersion = "";
-      let platform = navigator.platform || "";
-
-      if (navigator.userAgentData?.getHighEntropyValues) {
-        try {
-          const high = await navigator.userAgentData.getHighEntropyValues([
-            "platform", "platformVersion", "fullVersionList", "uaFullVersion"
-          ]);
-          const brands = high.fullVersionList || navigator.userAgentData.brands || [];
-          const main = brands.find(b => !/Not.*Brand/i.test(b.brand)) || brands[0] || {};
-          browserBrand = main.brand || "";
-          browserVersion = high.uaFullVersion || main.version || "";
-          platform = high.platform || platform;
-          return { browserBrand, browserVersion, platform, userAgent: ua };
-        } catch (e) {
-          // ignore and fallback
-        }
-      }
-
-      return { browserBrand, browserVersion, platform, userAgent: ua };
-    }
-
-    async function buildParams() {
-      const base = {
-        // Your requested params
-        language: $('language').value,
-        region: $('region').value,
-
-        // Extra context (device/browser/page)
-        device: isMobile() ? "mobile" : "desktop",
-        pageUrl: location.href,
-        pagePath: location.pathname,
-        pageTitle: document.title,
+    function buildParams() {
+      const params = {
+        language: $('language').value
       };
 
-      const browser = await getBrowserInfo();
-      return { ...base, ...browser };
+      // Only send region if frontend can get it
+      if (!$('omitRegion').checked) {
+        params.region = $('region').value;
+      }
+
+      return params;
     }
 
-    async function renderOut() {
-      const params = await buildParams();
-      $('out').textContent = JSON.stringify(params, null, 2);
+    function renderOut() {
+      $('out').textContent = JSON.stringify(buildParams(), null, 2);
     }
 
     function getDf() {
@@ -149,26 +153,19 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderOut();
 
-      $('language').addEventListener('change', renderOut);
-      $('region').addEventListener('change', renderOut);
-
-      $('applyBtn').addEventListener('click', async () => {
-        const df = getDf();
-        if (!df) return;
-
-        const params = await buildParams();
-        df.setQueryParameters({ parameters: params });
-
-        console.log('Applied parameters:', params);
-        alert('Applied! Next message/event will include language/region + device/browser/page.');
+      ['language', 'region', 'omitRegion'].forEach(id => {
+        $(id).addEventListener('change', renderOut);
       });
 
-      $('newSessionBtn').addEventListener('click', () => {
+      $('applyBtn').addEventListener('click', () => {
         const df = getDf();
         if (!df) return;
 
-        df.startNewSession();
-        alert('New session started (history cleared).');
+        const params = buildParams();
+        df.setQueryParameters({ parameters: params });
+
+        console.log('[Apply] setQueryParameters:', params);
+        alert('Applied! Next message will use these parameters.');
       });
 
       $('sendHelloBtn').addEventListener('click', () => {

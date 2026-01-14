@@ -36,11 +36,10 @@ $('userId').addEventListener('input', () => renderOut(buildParams()));
 
 // 等 df-messenger 真係 ready 先 enable buttons
 window.addEventListener('df-messenger-loaded', () => {
-  $('applyBtn').disabled = false;
-  $('newSessionBtn').disabled = false;
-  $('sendHelloBtn').disabled = false;
-
-  renderOut(buildParams());
+  applyBtn.disabled = false;
+  newSessionBtn.disabled = false;
+  sendHelloBtn.disabled = false;
+  console.log('df-messenger ready');
 });
 
 // Apply：寫入 session parameters（之後每次 request 都會帶住）

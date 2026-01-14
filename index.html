@@ -1,17 +1,79 @@
 <!doctype html>
-<html lang="zh-HK">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DF Messenger Demo (params)</title>
+  <title>ChatBot Demo (DF Messenger params)</title>
 
-  <link rel="stylesheet" href="./styles.css" />
+  <!-- (Optional but recommended) default theme -->
+  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 
-  <!-- Dialogflow Messenger library (一定要先載入) -->
+  <!-- DF Messenger library -->
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
-  <!-- 你自己嘅 JS（defer 會等 HTML parse 完先跑） -->
-  <script defer src="./app.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      margin: 24px;
+    }
+    .panel {
+      max-width: 900px;
+      padding: 16px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+      align-items: end;
+    }
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 14px;
+    }
+    select, input, button {
+      font-size: 14px;
+      padding: 8px 10px;
+    }
+    button { cursor: pointer; }
+    pre {
+      background: #f7f7f7;
+      padding: 12px;
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 260px;
+    }
+    .muted { color: #666; font-size: 13px; line-height: 1.4; }
+
+    /* Pin chat bubble to bottom-right (very effective) */
+    df-messenger-chat-bubble {
+      position: fixed !important;
+      right: 16px !important;
+      bottom: 16px !important;
+      left: auto !important;
+      top: auto !important;
+      z-index: 999999 !important;
+
+      /* Keep chat window in bounds */
+      --df-messenger-chat-window-width: 340px;
+      --df-messenger-chat-window-height: 520px;
+      --df-messenger-chat-window-offset: 16px;
+    }
+
+    /* Also pin outer wrapper just in case */
+    df-messenger {
+      position: fixed !important;
+      right: 16px !important;
+      bottom: 16px !important;
+      left: auto !important;
+      top: auto !important;
+      z-index: 999999 !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -43,29 +105,132 @@
         userId (optional)
         <input id="userId" placeholder="e.g. u_12345" />
       </label>
-    </div>
 
-    <div class="row">
       <button id="applyBtn" disabled>Apply parameters</button>
       <button id="newSessionBtn" disabled>Start new session</button>
       <button id="sendHelloBtn" disabled>Send “hello”</button>
     </div>
 
+    <p class="muted">
+      Notes:
+      <br>• Buttons enable on page load (no waiting for df-messenger-loaded).
+      <br>• “Apply parameters” sets session parameters via setQueryParameters().
+      <br>• “Send hello” triggers a reply immediately.
+      <br>• Open DevTools Console to see debug logs.
+    </p>
+
     <h4>Current parameters</h4>
     <pre id="out">{}</pre>
   </div>
 
-  <!-- 你個 chatbot -->
+  <!-- Your chatbot -->
   <df-messenger
     project-id="viu-pmo-poc"
     agent-id="d2fb0084-cb90-4de0-a8f1-caaed8f85603"
     language-code="en"
-    max-query-length="-1">
+    max-query-length="256">
     <df-messenger-chat-bubble
       chat-title="Demo Bot"
       anchor="top-left"
       allow-fullscreen="small">
     </df-messenger-chat-bubble>
   </df-messenger>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function getDf() {
+      const df = document.querySelector('df-messenger');
+      if (!df) console.warn('[demo] df-messenger not found yet');
+      return df;
+    }
+
+    function getBrowserInfo() {
+      return {
+        pageUrl: location.href,
+        pagePath: location.pathname,
+        pageTitle: document.title,
+        userAgent: navigator.userAgent,
+      };
+    }
+
+    function buildParams() {
+      const p = {
+        region: $('region').value,
+        countryCode: $('countryCode').value,
+        userId: ($('userId').value || '').trim(),
+        ...getBrowserInfo(),
+      };
+      if (!p.userId) delete p.userId;
+      return p;
+    }
+
+    function renderOut() {
+      $('out').textContent = JSON.stringify(buildParams(), null, 2);
+    }
+
+    function enableButtons() {
+      $('applyBtn').disabled = false;
+      $('newSessionBtn').disabled = false;
+      $('sendHelloBtn').disabled = false;
+      console.log('[demo] buttons enabled');
+    }
+
+    // Debug listeners (optional)
+    window.addEventListener('df-messenger-loaded', () => console.log('[debug] df-messenger-loaded (window)'));
+    window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error (window):', e?.detail?.error || e));
+    window.addEventListener('df-request-sent', (e) => console.log('[debug] df-request-sent requestBody:', e?.detail?.data?.requestBody));
+
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('[demo] DOMContentLoaded');
+      enableButtons();
+      renderOut();
+
+      ['region', 'countryCode'].forEach(id => $(id).addEventListener('change', renderOut));
+      $('userId').addEventListener('input', renderOut);
+
+      $('applyBtn').addEventListener('click', () => {
+        const df = getDf();
+        if (!df) return;
+
+        const params = buildParams();
+        try {
+          df.setQueryParameters({ parameters: params });
+          console.log('[demo] Applied parameters:', params);
+          alert('Applied! Next message/event will include these parameters.');
+        } catch (err) {
+          console.error('[demo] setQueryParameters failed:', err);
+          alert('setQueryParameters failed. Check Console for details.');
+        }
+      });
+
+      $('newSessionBtn').addEventListener('click', () => {
+        const df = getDf();
+        if (!df) return;
+
+        try {
+          df.startNewSession();
+          console.log('[demo] Started new session');
+          alert('New session started (history cleared).');
+        } catch (err) {
+          console.error('[demo] startNewSession failed:', err);
+          alert('startNewSession failed. Check Console for details.');
+        }
+      });
+
+      $('sendHelloBtn').addEventListener('click', () => {
+        const df = getDf();
+        if (!df) return;
+
+        try {
+          df.sendQuery('hello');
+          console.log('[demo] Sent query: hello');
+        } catch (err) {
+          console.error('[demo] sendQuery failed:', err);
+          alert('sendQuery failed. Check Console for details.');
+        }
+      });
+    });
+  </script>
 </body>
 </html>

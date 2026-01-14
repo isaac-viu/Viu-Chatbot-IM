@@ -3,21 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ChatBot Demo (DF Messenger params)</title>
+  <title>DF Messenger Demo (Language & Region)</title>
 
-  <!-- (Optional but recommended) default theme -->
-  <link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+  <!-- Optional: default theme -->
+  <link rel="stylesheet"
+    href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
 
-  <!-- DF Messenger library -->
+  <!-- DF Messenger -->
   <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
   <style>
     body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
       margin: 24px;
     }
     .panel {
-      max-width: 900px;
+      max-width: 800px;
       padding: 16px;
       border: 1px solid #ddd;
       border-radius: 12px;
@@ -26,8 +27,8 @@
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin: 10px 0;
       align-items: end;
+      margin-bottom: 12px;
     }
     label {
       display: flex;
@@ -35,42 +36,33 @@
       gap: 6px;
       font-size: 14px;
     }
-    select, input, button {
-      font-size: 14px;
+    select, button {
       padding: 8px 10px;
+      font-size: 14px;
     }
-    button { cursor: pointer; }
+    button {
+      cursor: pointer;
+    }
     pre {
       background: #f7f7f7;
       padding: 12px;
-      border-radius: 10px;
-      overflow: auto;
-      max-height: 260px;
+      border-radius: 8px;
     }
-    .muted { color: #666; font-size: 13px; line-height: 1.4; }
 
-    /* Pin chat bubble to bottom-right (very effective) */
+    /* Pin chatbot bottom-right */
     df-messenger-chat-bubble {
       position: fixed !important;
       right: 16px !important;
       bottom: 16px !important;
-      left: auto !important;
-      top: auto !important;
       z-index: 999999 !important;
 
-      /* Keep chat window in bounds */
       --df-messenger-chat-window-width: 340px;
       --df-messenger-chat-window-height: 520px;
-      --df-messenger-chat-window-offset: 16px;
     }
-
-    /* Also pin outer wrapper just in case */
     df-messenger {
       position: fixed !important;
       right: 16px !important;
       bottom: 16px !important;
-      left: auto !important;
-      top: auto !important;
       z-index: 999999 !important;
     }
   </style>
@@ -82,48 +74,31 @@
   <div class="panel">
     <div class="row">
       <label>
+        Language
+        <select id="language">
+          <option value="en">English</option>
+          <option value="zh-HK">Chinese (HK)</option>
+          <option value="ja">Japanese</option>
+        </select>
+      </label>
+
+      <label>
         Region
         <select id="region">
-          <option value="APAC">APAC</option>
-          <option value="EMEA">EMEA</option>
-          <option value="AMER">AMER</option>
+          <option value="singapore">Singapore</option>
+          <option value="southAfrica">South Africa</option>
         </select>
       </label>
 
-      <label>
-        Country Code
-        <select id="countryCode">
-          <option value="HK">HK</option>
-          <option value="JP">JP</option>
-          <option value="SG">SG</option>
-          <option value="US">US</option>
-          <option value="GB">GB</option>
-        </select>
-      </label>
-
-      <label>
-        userId (optional)
-        <input id="userId" placeholder="e.g. u_12345" />
-      </label>
-
-      <button id="applyBtn" disabled>Apply parameters</button>
-      <button id="newSessionBtn" disabled>Start new session</button>
-      <button id="sendHelloBtn" disabled>Send “hello”</button>
+      <button id="applyBtn">Apply parameters</button>
+      <button id="sendHelloBtn">Send “hello”</button>
     </div>
-
-    <p class="muted">
-      Notes:
-      <br>• Buttons enable on page load (no waiting for df-messenger-loaded).
-      <br>• “Apply parameters” sets session parameters via setQueryParameters().
-      <br>• “Send hello” triggers a reply immediately.
-      <br>• Open DevTools Console to see debug logs.
-    </p>
 
     <h4>Current parameters</h4>
     <pre id="out">{}</pre>
   </div>
 
-  <!-- Your chatbot -->
+  <!-- Chatbot -->
   <df-messenger
     project-id="viu-pmo-poc"
     agent-id="d2fb0084-cb90-4de0-a8f1-caaed8f85603"
@@ -139,96 +114,43 @@
   <script>
     const $ = (id) => document.getElementById(id);
 
-    function getDf() {
-      const df = document.querySelector('df-messenger');
-      if (!df) console.warn('[demo] df-messenger not found yet');
-      return df;
-    }
-
-    function getBrowserInfo() {
-      return {
-        pageUrl: location.href,
-        pagePath: location.pathname,
-        pageTitle: document.title,
-        userAgent: navigator.userAgent,
-      };
-    }
-
     function buildParams() {
-      const p = {
-        region: $('region').value,
-        countryCode: $('countryCode').value,
-        userId: ($('userId').value || '').trim(),
-        ...getBrowserInfo(),
+      return {
+        language: $('language').value,
+        region: $('region').value
       };
-      if (!p.userId) delete p.userId;
-      return p;
     }
 
     function renderOut() {
       $('out').textContent = JSON.stringify(buildParams(), null, 2);
     }
 
-    function enableButtons() {
-      $('applyBtn').disabled = false;
-      $('newSessionBtn').disabled = false;
-      $('sendHelloBtn').disabled = false;
-      console.log('[demo] buttons enabled');
+    function getDf() {
+      return document.querySelector('df-messenger');
     }
 
-    // Debug listeners (optional)
-    window.addEventListener('df-messenger-loaded', () => console.log('[debug] df-messenger-loaded (window)'));
-    window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error (window):', e?.detail?.error || e));
-    window.addEventListener('df-request-sent', (e) => console.log('[debug] df-request-sent requestBody:', e?.detail?.data?.requestBody));
-
     document.addEventListener('DOMContentLoaded', () => {
-      console.log('[demo] DOMContentLoaded');
-      enableButtons();
       renderOut();
 
-      ['region', 'countryCode'].forEach(id => $(id).addEventListener('change', renderOut));
-      $('userId').addEventListener('input', renderOut);
+      $('language').addEventListener('change', renderOut);
+      $('region').addEventListener('change', renderOut);
 
       $('applyBtn').addEventListener('click', () => {
         const df = getDf();
         if (!df) return;
 
         const params = buildParams();
-        try {
-          df.setQueryParameters({ parameters: params });
-          console.log('[demo] Applied parameters:', params);
-          alert('Applied! Next message/event will include these parameters.');
-        } catch (err) {
-          console.error('[demo] setQueryParameters failed:', err);
-          alert('setQueryParameters failed. Check Console for details.');
-        }
-      });
+        df.setQueryParameters({ parameters: params });
 
-      $('newSessionBtn').addEventListener('click', () => {
-        const df = getDf();
-        if (!df) return;
-
-        try {
-          df.startNewSession();
-          console.log('[demo] Started new session');
-          alert('New session started (history cleared).');
-        } catch (err) {
-          console.error('[demo] startNewSession failed:', err);
-          alert('startNewSession failed. Check Console for details.');
-        }
+        console.log('Applied parameters:', params);
+        alert('Applied! Next message will include language & region.');
       });
 
       $('sendHelloBtn').addEventListener('click', () => {
         const df = getDf();
         if (!df) return;
 
-        try {
-          df.sendQuery('hello');
-          console.log('[demo] Sent query: hello');
-        } catch (err) {
-          console.error('[demo] sendQuery failed:', err);
-          alert('sendQuery failed. Check Console for details.');
-        }
+        df.sendQuery('hello');
       });
     });
   </script>

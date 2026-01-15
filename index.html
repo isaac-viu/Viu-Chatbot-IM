@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DF Messenger Demo – Full (params + new session + omit region)</title>
+
+  <!-- Default theme -->
+  <link rel="stylesheet"
+    href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
+
+  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- DF Messenger -->
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+
+  <!-- External JS -->
+  <script defer src="./app.js"></script>
+</head>
+
+<body>
+  <h2>ChatBot Demo – Full</h2>
+
+  <div class="panel">
+    <div class="row">
+      <label>
+        Language (param)
+        <select id="language">
+          <option value="en">English</option>
+          <option value="zh-HK">Chinese (HK)</option>
+          <option value="ja">Japanese</option>
+        </select>
+      </label>
+
+      <label>
+        Region (param)
+        <select id="region">
+          <option value="singapore">Singapore</option>
+          <option value="southAfrica">South Africa</option>
+        </select>
+      </label>
+
+      <label style="flex-direction: row; align-items: center; gap: 8px; padding-top: 22px;">
+        <input type="checkbox" id="omitRegion" />
+        Simulate: frontend can’t get region (do NOT send region)
+      </label>
+
+      <button id="applyBtn">Apply parameters</button>
+      <button id="newSessionBtn">Start new session</button>
+      <button id="sendHelloBtn">Send “hello”</button>
+    </div>
+
+    <p class="muted">
+      • Apply = <code>setQueryParameters()</code> (sets default queryParams for subsequent messages).<br />
+      • Start new session = <code>startNewSession()</code> (clears history; good for testing changes).<br />
+      • If “omit region” is checked → <b>region key is completely omitted</b> (CX can detect
+      <code>$session.params.region = null</code>).<br />
+      • Extra context params are included every time: device/browser/page info.
+    </p>
+
+    <h4>Parameters that will be sent (preview)</h4>
+    <pre id="out">{}</pre>
+  </div>
+
+  <!-- Chatbot -->
+  <df-messenger project-id="viu-pmo-poc" agent-id="d2fb0084-cb90-4de0-a8f1-caaed8f85603" language-code="en"
+    max-query-length="256">
+    <df-messenger-chat-bubble chat-title="Demo Bot" anchor="top-left" allow-fullscreen="small">
+    </df-messenger-chat-bubble>
+  </df-messenger>
+
+</body>
+
+</html>

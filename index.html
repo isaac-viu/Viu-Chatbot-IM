@@ -25,38 +25,38 @@
   <div class="panel">
     <div class="row">
       <label>
-        Language (param)
-        <select id="language">
-          <option value="en">English</option>
-          <option value="zh-HK">Chinese (HK)</option>
-          <option value="ja">Japanese</option>
-        </select>
-      </label>
-
-      <label>
-        Region (param)
+        Region
         <select id="region">
           <option value="singapore">Singapore</option>
           <option value="southAfrica">South Africa</option>
         </select>
       </label>
 
-      <label style="flex-direction: row; align-items: center; gap: 8px; padding-top: 22px;">
+      <label>
+        Language
+        <select id="language">
+          <option value="en">English</option>
+          <option value="zh-CN">Chinese (Simplified)</option>
+          <option value="ms">Malay</option>
+          <option value="ta">Tamil</option>
+          <option value="af">Afrikaans</option>
+        </select>
+      </label>
+
+      <label class="toggle-container">
         <input type="checkbox" id="omitRegion" />
-        Simulate: frontend can’t get region (do NOT send region)
+        Omit region (frontend fallback)
       </label>
 
       <button id="applyBtn">Apply parameters</button>
       <button id="newSessionBtn">Start new session</button>
-      <button id="sendHelloBtn">Send “hello”</button>
     </div>
 
     <p class="muted">
-      • Apply = <code>setQueryParameters()</code> (sets default queryParams for subsequent messages).<br />
-      • Start new session = <code>startNewSession()</code> (clears history; good for testing changes).<br />
-      • If “omit region” is checked → <b>region key is completely omitted</b> (CX can detect
-      <code>$session.params.region = null</code>).<br />
-      • Extra context params are included every time: device/browser/page info.
+      • <b>Apply</b>: Sets parameters for the next message.<br />
+      • <b>Start new session</b>: Clears history (use after Apply for a fresh start).<br />
+      • <b>Check "Omit"</b>: Simulates missing region data.<br />
+      • <b>Preview</b>: Check the JSON box below for current data.
     </p>
 
     <h4>Parameters that will be sent (preview)</h4>

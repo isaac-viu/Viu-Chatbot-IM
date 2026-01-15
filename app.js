@@ -5,31 +5,25 @@ function isMobile() {
 }
 
 async function getBrowserInfo() {
-  // Prefer UA-CH if available; fallback to userAgent only
-  const ua = navigator.userAgent || "";
   let browserBrand = "";
   let browserVersion = "";
-  let platform = navigator.platform || "";
 
+  // Try Network Information API (UA Client Hints) - works in Chrome/Edge
   if (navigator.userAgentData?.getHighEntropyValues) {
     try {
       const high = await navigator.userAgentData.getHighEntropyValues([
-        "platform", "fullVersionList", "uaFullVersion"
+        "fullVersionList", "uaFullVersion"
       ]);
       const brands = high.fullVersionList || navigator.userAgentData.brands || [];
       const main = brands.find(b => !/Not.*Brand/i.test(b.brand)) || brands[0] || {};
       browserBrand = main.brand || "";
       browserVersion = high.uaFullVersion || main.version || "";
-      platform = high.platform || platform;
-      return { browserBrand, browserVersion, platform, userAgent: ua };
     } catch (e) {
-      // ignore and fallback
+      // ignore
     }
   }
 
-  // Very light fallback parsing (optional)
-  // Keep userAgent always, leave brand/version empty if unknown
-  return { browserBrand, browserVersion, platform, userAgent: ua };
+  return { browserBrand, browserVersion };
 }
 
 async function buildParams() {
@@ -39,9 +33,7 @@ async function buildParams() {
 
     // extra context params
     device: isMobile() ? "mobile" : "desktop",
-    pageUrl: location.href,
-    pagePath: location.pathname,
-    pageTitle: document.title
+    pageUrl: location.href
   };
 
   // region: omit entirely if simulate is enabled
@@ -49,6 +41,7 @@ async function buildParams() {
     base.region = $('region').value;
   }
 
+  // Add browser info (brand & version only)
   const browser = await getBrowserInfo();
   return { ...base, ...browser };
 }
@@ -91,12 +84,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     df.startNewSession();
     alert('New session started (history cleared).');
-  });
-
-  $('sendHelloBtn').addEventListener('click', () => {
-    const df = getDf();
-    if (!df) return;
-
-    df.sendQuery('hello');
   });
 });

@@ -1,69 +1,170 @@
+/* Fonts */
+:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: #334155;
+  --input-bg: #334155;
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --surface-hover: #475569;
+}
+
 body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  margin: 24px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  padding: 40px 20px;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+}
+
+h2 {
+  font-weight: 600;
+  margin-bottom: 24px;
+  font-size: 24px;
+  letter-spacing: -0.025em;
 }
 
 .panel {
-  max-width: 980px;
-  padding: 16px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
+  width: 100%;
+  max-width: 800px;
+  background-color: var(--card-bg);
+  padding: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 .row {
   display: flex;
-  gap: 12px;
+  gap: 20px;
   flex-wrap: wrap;
-  align-items: end;
-  margin-bottom: 12px;
+  align-items: flex-end;
+  margin-bottom: 24px;
 }
 
+/* Form Elements */
 label {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+  min-width: 200px;
 }
 
 select,
-input,
-button {
-  padding: 8px 10px;
+input[type="text"] {
+  padding: 10px 12px;
   font-size: 14px;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: white;
+  outline: none;
+  transition: all 0.2s;
 }
 
-button {
+select:focus,
+input[type="text"]:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Toggle Switch Style */
+.toggle-container {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding-top: 10px;
+  color: var(--text-primary);
   cursor: pointer;
 }
 
-pre {
-  background: #f7f7f7;
-  padding: 12px;
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--primary-color);
+  cursor: pointer;
+}
+
+/* Buttons */
+button {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: none;
   border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--surface-hover);
+  color: white;
+}
+
+button:hover {
+  background-color: #64748b;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#applyBtn {
+  background-color: var(--primary-color);
+}
+
+#applyBtn:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Output Area */
+pre {
+  background: #020617;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
   overflow: auto;
-  max-height: 340px;
+  max-height: 300px;
+  font-family: 'Menlo', 'Monaco', monospace;
+  font-size: 13px;
+  color: #e2e8f0;
+  margin-top: 16px;
 }
 
 .muted {
-  color: #666;
+  color: var(--text-secondary);
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.6;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
 }
 
-/* Pin chatbot bottom-right + keep window in bounds */
+code {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Chatbot Positioning */
 df-messenger-chat-bubble {
   position: fixed !important;
-  right: 16px !important;
-  bottom: 16px !important;
+  right: 24px !important;
+  bottom: 24px !important;
   z-index: 999999 !important;
-  --df-messenger-chat-window-width: 360px;
-  --df-messenger-chat-window-height: 560px;
-  --df-messenger-chat-window-offset: 16px;
+  --df-messenger-chat-window-width: 380px;
+  --df-messenger-chat-window-height: 600px;
 }
 
 df-messenger {
-  position: fixed !important;
-  right: 16px !important;
-  bottom: 16px !important;
   z-index: 999999 !important;
 }

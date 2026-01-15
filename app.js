@@ -55,12 +55,20 @@ function getDf() {
   return document.querySelector('df-messenger');
 }
 
-// Debug hooks: Show ACTUAL JSON sent to Google in the UI
+// Debug hooks: Show ACTUAL JSON sent/received to/from Google in the UI
 window.addEventListener('df-request-sent', (e) => {
   const body = e?.detail?.data?.requestBody;
   if (body) {
     console.log('[debug] df-request-sent requestBody:', body);
     $('debug-out').textContent = JSON.stringify(body, null, 2);
+  }
+});
+
+window.addEventListener('df-response-received', (e) => {
+  const body = e?.detail?.data;
+  if (body) {
+    console.log('[debug] df-response-received:', body);
+    $('debug-in').textContent = JSON.stringify(body, null, 2);
   }
 });
 

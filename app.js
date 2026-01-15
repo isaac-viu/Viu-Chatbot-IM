@@ -55,10 +55,17 @@ function getDf() {
   return document.querySelector('df-messenger');
 }
 
-// Debug hooks (optional)
+// Debug hooks: Show ACTUAL JSON sent to Google in the UI
+window.addEventListener('df-request-sent', (e) => {
+  const body = e?.detail?.data?.requestBody;
+  if (body) {
+    console.log('[debug] df-request-sent requestBody:', body);
+    $('debug-out').textContent = JSON.stringify(body, null, 2);
+  }
+});
+
 window.addEventListener('df-messenger-loaded', () => console.log('[debug] df-messenger-loaded'));
 window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
-window.addEventListener('df-request-sent', (e) => console.log('[debug] df-request-sent requestBody:', e?.detail?.data?.requestBody));
 
 document.addEventListener('DOMContentLoaded', () => {
   renderOut();
@@ -67,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
     $(id).addEventListener('change', renderOut);
   });
 
-  $('applyBtn').addEventListener('click', async () => {
+  async function applyNow() {
     const df = getDf();
     if (!df) return;
 
@@ -75,14 +82,24 @@ document.addEventListener('DOMContentLoaded', () => {
     df.setQueryParameters({ parameters: params });
 
     console.log('[Apply] setQueryParameters:', params);
-    alert('Applied! Next message will include these parameters.');
+    return params;
+  }
+
+  $('applyBtn').addEventListener('click', async () => {
+    await applyNow();
+    alert('Applied! Parameters will be sent with your next message.');
   });
 
-  $('newSessionBtn').addEventListener('click', () => {
+  $('newSessionBtn').addEventListener('click', async () => {
     const df = getDf();
     if (!df) return;
 
+    // 1. Start new session
     df.startNewSession();
-    alert('New session started (history cleared).');
+
+    // 2. IMPORTANT: Re-apply parameters immediately so the "starting" message has them
+    await applyNow();
+
+    alert('New session started & parameters re-applied!');
   });
 });

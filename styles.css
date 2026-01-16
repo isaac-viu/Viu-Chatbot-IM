@@ -14,54 +14,64 @@
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   margin: 0;
-  padding: 40px 20px;
+  padding: 0;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   min-height: 100vh;
 }
 
 h2 {
   font-weight: 600;
   margin-bottom: 24px;
-  font-size: 24px;
+  font-size: 22px;
   letter-spacing: -0.025em;
 }
 
+/* Layout Containers */
+.app-container {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  height: 100vh;
+  gap: 0;
+}
+
+.main-content {
+  padding: 40px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+}
+
+.sidebar {
+  padding: 40px 24px;
+  background-color: #111827;
+  /* Slightly darker than main */
+  overflow-y: auto;
+}
+
 .panel {
-  width: 100%;
-  max-width: 800px;
   background-color: var(--card-bg);
-  padding: 32px;
+  padding: 24px;
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-.row {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  margin-bottom: 24px;
+/* Form Styles */
+.control-group {
+  margin-bottom: 20px;
 }
 
-/* Form Elements */
 label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 14px;
+  display: block;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
-  flex: 1;
-  min-width: 200px;
+  margin-bottom: 8px;
 }
 
 select,
 input[type="text"] {
+  width: 100%;
   padding: 10px 12px;
   font-size: 14px;
   background-color: var(--input-bg);
@@ -69,6 +79,7 @@ input[type="text"] {
   border-radius: 8px;
   color: white;
   outline: none;
+  box-sizing: border-box;
   transition: all 0.2s;
 }
 
@@ -80,26 +91,34 @@ input[type="text"]:focus {
 
 /* Toggle Switch Style */
 .toggle-container {
+  display: flex !important;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
-  padding-top: 10px;
+  gap: 10px;
   color: var(--text-primary);
   cursor: pointer;
 }
 
 input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   accent-color: var(--primary-color);
-  cursor: pointer;
+  margin: 0;
 }
 
 /* Buttons */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
 button {
-  padding: 10px 20px;
+  width: 100%;
+  padding: 12px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -110,11 +129,6 @@ button {
 
 button:hover {
   background-color: #64748b;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 #applyBtn {
@@ -132,20 +146,24 @@ pre {
   border-radius: 8px;
   border: 1px solid var(--border-color);
   overflow: auto;
-  max-height: 300px;
+  max-height: 400px;
   font-family: 'Menlo', 'Monaco', monospace;
   font-size: 13px;
   color: #e2e8f0;
-  margin-top: 16px;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+.instructions {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
 }
 
 .muted {
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.6;
-  margin-top: 24px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-color);
 }
 
 code {
@@ -155,10 +173,12 @@ code {
   font-family: inherit;
 }
 
-/* Chatbot Positioning */
+/* Chatbot Positioning - MOVED TO LEFT */
 df-messenger-chat-bubble {
   position: fixed !important;
-  right: 24px !important;
+  left: 24px !important;
+  /* Moved to left side */
+  right: auto !important;
   bottom: 24px !important;
   z-index: 999999 !important;
   --df-messenger-chat-window-width: 380px;

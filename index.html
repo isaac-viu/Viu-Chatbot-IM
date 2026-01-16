@@ -20,71 +20,82 @@
 </head>
 
 <body>
-  <h2>ChatBot Demo – Full</h2>
 
-  <div class="panel">
-    <div class="row">
-      <label>
-        Region
-        <select id="region">
-          <option value="singapore">Singapore</option>
-          <option value="southAfrica">South Africa</option>
-        </select>
-      </label>
+  <div class="app-container">
+    <div class="main-content">
+      <h2>Debug Console</h2>
 
-      <label>
-        Language
-        <select id="language">
-          <option value="en">English</option>
-          <option value="zh-CN">Chinese (Simplified)</option>
-          <option value="ms">Malay</option>
-          <option value="ta">Tamil</option>
-          <option value="af">Afrikaans</option>
-        </select>
-      </label>
+      <div class="debug-section">
+        <h4 style="color: var(--text-secondary);">Parameters (Local Preview)</h4>
+        <pre id="out">{}</pre>
 
-      <label class="toggle-container">
-        <input type="checkbox" id="omitRegion" />
-        Omit region (frontend fallback)
-      </label>
+        <h4 style="margin-top: 24px; color: #3b82f6;">Debug: Actual JSON Sent to Google</h4>
+        <pre id="debug-out" style="border-color: #3b82f6;">No requests sent yet.</pre>
 
-      <button id="applyBtn">Apply parameters</button>
-      <button id="newSessionBtn">Start new session</button>
+        <h4 style="margin-top: 24px; color: #10b981;">Debug: Response from Google</h4>
+        <pre id="debug-in" style="border-color: #10b981;">No responses received yet.</pre>
+      </div>
     </div>
 
-    <div class="row">
-      <label>
-        User ID (12 digits)
-        <input type="text" id="userId" value="123456789012" maxlength="12" />
-      </label>
+    <aside class="sidebar">
+      <h2>Control Panel</h2>
+      <div class="panel">
+        <div class="control-group">
+          <label>Region</label>
+          <select id="region">
+            <option value="singapore">Singapore</option>
+            <option value="southAfrica">South Africa</option>
+          </select>
+        </div>
 
-      <label>
-        User Tier
-        <select id="userTier">
-          <option value="0">0</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-        </select>
-      </label>
-    </div>
+        <div class="control-group">
+          <label>Language</label>
+          <select id="language">
+            <option value="en">English</option>
+            <option value="zh-CN">Chinese (Simplified)</option>
+            <option value="ms">Malay</option>
+            <option value="ta">Tamil</option>
+            <option value="af">Afrikaans</option>
+          </select>
+        </div>
 
-    <p class="muted">
-      • <b>Apply</b>: Sets parameters for the next message.<br />
-      • <b>Start new session</b>: Clears history (use after Apply for a fresh start).<br />
-      • <b>Check "Omit"</b>: Simulates missing region data.<br />
-      • <b>Preview</b>: Check the JSON box below for current data.
-    </p>
+        <div class="control-group">
+          <label>User ID (12 digits)</label>
+          <input type="text" id="userId" value="123456789012" maxlength="12" />
+        </div>
 
-    <h4>Parameters (Local Preview)</h4>
-    <pre id="out">{}</pre>
+        <div class="control-group">
+          <label>User Tier</label>
+          <select id="userTier">
+            <option value="0">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </div>
 
-    <h4 style="margin-top: 24px; color: #3b82f6;">Debug: Actual JSON Sent to Google</h4>
-    <pre id="debug-out" style="border-color: #3b82f6;">No requests sent yet.</pre>
+        <div class="control-group">
+          <label class="toggle-container">
+            <input type="checkbox" id="omitRegion" />
+            Omit region (fallback)
+          </label>
+        </div>
 
-    <h4 style="margin-top: 24px; color: #10b981;">Debug: Response from Google</h4>
-    <pre id="debug-in" style="border-color: #10b981;">No responses received yet.</pre>
+        <div class="button-group">
+          <button id="applyBtn">Apply parameters</button>
+          <button id="newSessionBtn">Start new session</button>
+        </div>
+
+        <div class="instructions">
+          <p class="muted">
+            • <b>Apply</b>: Sets parameters for the next message.<br />
+            • <b>Start new session</b>: Clears history (use after Apply for a fresh start).<br />
+            • <b>Check "Omit"</b>: Simulates missing region data.
+          </p>
+        </div>
+      </div>
+    </aside>
   </div>
 
   <!-- Chatbot -->

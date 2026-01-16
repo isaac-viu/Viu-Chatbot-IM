@@ -91,32 +91,6 @@ window.addEventListener('df-response-received', (e) => {
   }
 });
 
-window.addEventListener('df-messenger-loaded', async () => {
-  console.log('[debug] df-messenger-loaded');
-  const df = getDf();
-  if (!df) return;
-
-  // Apply parameters immediately so they are ready
-  const params = await buildParams();
-  df.setQueryParameters({ parameters: params });
-});
-
-window.addEventListener('df-chat-open-changed', (event) => {
-  if (event.detail.isOpen && !welcomeSent) {
-    const df = getDf();
-    if (df) {
-      df.sendRequest({
-        queryInput: {
-          event: { event: "sys.welcome-default" },
-          languageCode: $('language').value || "en"
-        }
-      });
-      console.log('[Init] Triggered sys.welcome-default on chat open');
-      welcomeSent = true;
-    }
-  }
-});
-
 window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -134,30 +108,41 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!df) return;
 
     const params = await buildParams();
+
+    // 1. Set parameters for future messages
     df.setQueryParameters({ parameters: params });
 
-    console.log('[Apply] setQueryParameters:', params);
+    // 2. Proactively sync parameters by sending an event
+    // This makes the bot "know" the parameters immediately without user typing.
+    df.sendRequest({
+      queryInput: {
+        event: { event: "session-sync" },
+        languageCode: $('language').value || "en"
+      }
+    });
+
+    console.log('[Apply] setQueryParameters and sent session-sync event:', params);
     return params;
   }
 
   $('applyBtn').addEventListener('click', async () => {
     await applyNow();
-    showToast('Applied! Parameters will be sent with your next message.');
+    showToast('Applied and synced! The bot now knows your parameters.');
   });
 
   $('newSessionBtn').addEventListener('click', async () => {
     const df = getDf();
     if (!df) return;
 
-    // Reset welcome flag so it triggers again on next open
+    // Reset welcome flag so 'intent' attribute or manual triggers can fire again if needed
     welcomeSent = false;
 
     // 1. Start new session
     df.startNewSession();
 
-    // 2. IMPORTANT: Re-apply parameters immediately
+    // 2. IMPORTANT: Re-apply and sync parameters immediately
     await applyNow();
 
-    showToast('New session started & parameters re-applied!');
+    showToast('New session started & parameters synced!');
   });
 });

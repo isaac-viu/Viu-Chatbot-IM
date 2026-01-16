@@ -124,14 +124,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Proactively sync parameters by sending an event
     // This makes the bot "know" the parameters immediately without user typing.
-    df.sendRequest({
-      queryInput: {
-        event: { event: "session-sync" },
-        languageCode: $('language').value || "en"
-      },
-      queryParams: {
-        parameters: params
-      }
+    df.sendRequest('event', {
+      event: "session-sync",
+      languageCode: $('language').value || "en"
     });
 
     console.log('[Apply] setQueryParameters and sent session-sync event:', params);
@@ -155,16 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
     df.setQueryParameters({ parameters: params });
 
     // 3. Manually send WELCOME_EVENT with parameters
-    // (automatic WELCOME_EVENT from startNewSession doesn't include custom params)
+    // (setQueryParameters above ensures params are included automatically)
     setTimeout(() => {
-      df.sendRequest({
-        queryInput: {
-          event: { event: "WELCOME_EVENT" },
-          languageCode: $('language').value || "en"
-        },
-        queryParams: {
-          parameters: params
-        }
+      df.sendRequest('event', {
+        event: "WELCOME_EVENT",
+        languageCode: $('language').value || "en"
       });
     }, 100);
 

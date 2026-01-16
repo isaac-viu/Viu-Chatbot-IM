@@ -146,19 +146,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Start new session first (clears history)
     df.startNewSession();
 
-    // 2. Build and set parameters
-    const params = await buildParams();
-    df.setQueryParameters({ parameters: params });
+    // 2. Start manual initialization flow after a delay to ensure session is cleared
+    // We move setQueryParameters INSIDE the timeout to avoid race conditions with startNewSession
+    setTimeout(async () => {
+      // Re-build and Re-set parameters
+      const params = await buildParams();
+      df.setQueryParameters({ parameters: params });
+      console.log('[New Session] setQueryParameters delayed:', params);
 
-    // 3. Manually send WELCOME_EVENT with parameters
-    // (setQueryParameters above ensures params are included automatically)
-    setTimeout(() => {
+      // Manually send WELCOME_EVENT
       df.sendRequest('event', {
         event: "WELCOME_EVENT",
-        languageCode: $('language').value || "en",
-        parameters: params
+        languageCode: $('language').value || "en"
       });
-    }, 100);
+    }, 500);
 
     showToast('New session started & parameters synced!');
   });

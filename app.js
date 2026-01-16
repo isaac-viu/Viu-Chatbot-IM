@@ -1,4 +1,5 @@
 const $ = (id) => document.getElementById(id);
+let welcomeSent = false;
 
 function isMobile() {
   return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
@@ -79,28 +80,30 @@ window.addEventListener('df-response-received', (e) => {
 
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
-
   const df = getDf();
   if (!df) return;
 
-  // 1. Ensure parameters are applied before the welcome event
-  // This allows the Welcome Intent to use conditions based on userId, region, etc.
+  // Apply parameters immediately so they are ready
   const params = await buildParams();
   df.setQueryParameters({ parameters: params });
-
-  // 2. Trigger "sys.welcome-default" event programmatically
-  // This makes the bot ask/greet the user first.
-  df.sendRequest({
-    queryInput: {
-      event: {
-        event: "sys.welcome-default"
-      },
-      languageCode: $('language').value || "en"
-    }
-  });
-
-  console.log('[Init] Triggered sys.welcome-default programmatically');
 });
+
+window.addEventListener('df-chat-open-changed', (event) => {
+  if (event.detail.isOpen && !welcomeSent) {
+    const df = getDf();
+    if (df) {
+      df.sendRequest({
+        queryInput: {
+          event: { event: "sys.welcome-default" },
+          languageCode: $('language').value || "en"
+        }
+      });
+      console.log('[Init] Triggered sys.welcome-default on chat open');
+      welcomeSent = true;
+    }
+  }
+});
+
 window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -133,10 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const df = getDf();
     if (!df) return;
 
+    // Reset welcome flag so it triggers again on next open
+    welcomeSent = false;
+
     // 1. Start new session
     df.startNewSession();
 
-    // 2. IMPORTANT: Re-apply parameters immediately so the "starting" message has them
+    // 2. IMPORTANT: Re-apply parameters immediately
     await applyNow();
 
     alert('New session started & parameters re-applied!');

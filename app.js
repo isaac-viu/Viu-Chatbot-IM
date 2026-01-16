@@ -144,12 +144,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const df = getDf();
     if (!df) return;
 
-    // 1. Set parameters FIRST so the next request (WELCOME_EVENT) has them
+    // 1. Start new session first (clears history)
+    df.startNewSession();
+
+    // 2. Build and set parameters
     const params = await buildParams();
     df.setQueryParameters({ parameters: params });
 
-    // 2. Start new session (this triggers WELCOME_EVENT with the parameters)
-    df.startNewSession();
+    // 3. Manually send WELCOME_EVENT with parameters
+    // (automatic WELCOME_EVENT from startNewSession doesn't include custom params)
+    setTimeout(() => {
+      df.sendRequest({
+        queryInput: {
+          event: { event: "WELCOME_EVENT" },
+          languageCode: $('language').value || "en"
+        }
+      });
+    }, 100);
 
     showToast('New session started & parameters synced!');
   });

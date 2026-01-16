@@ -34,6 +34,7 @@ async function buildParams() {
     // user info
     userId: $('userId').value,
     userTier: $('userTier').value,
+    isDebugMode: $('debugMode').checked,
 
     // extra context params
     device: isMobile() ? "mobile" : "desktop",
@@ -82,7 +83,7 @@ window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-mes
 document.addEventListener('DOMContentLoaded', () => {
   renderOut();
 
-  ['language', 'region', 'omitRegion', 'userId', 'userTier'].forEach(id => {
+  ['language', 'region', 'omitRegion', 'userId', 'userTier', 'debugMode'].forEach(id => {
     $(id).addEventListener('change', renderOut);
     if (id === 'userId') {
       $(id).addEventListener('input', renderOut);

@@ -126,7 +126,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // This makes the bot "know" the parameters immediately without user typing.
     df.sendRequest('event', {
       event: "session-sync",
-      languageCode: $('language').value || "en"
+      languageCode: $('language').value || "en",
+      parameters: params
     });
 
     console.log('[Apply] setQueryParameters and sent session-sync event:', params);
@@ -154,7 +155,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       df.sendRequest('event', {
         event: "WELCOME_EVENT",
-        languageCode: $('language').value || "en"
+        languageCode: $('language').value || "en",
+        parameters: params
       });
     }, 100);
 

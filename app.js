@@ -1,6 +1,19 @@
 const $ = (id) => document.getElementById(id);
 let welcomeSent = false;
 
+function showToast(message) {
+  const container = $('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  // Remove element after animation finishes (300ms in + 2400ms delay + 300ms out = 3000ms)
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
 function isMobile() {
   return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 }
@@ -129,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('applyBtn').addEventListener('click', async () => {
     await applyNow();
-    alert('Applied! Parameters will be sent with your next message.');
+    showToast('Applied! Parameters will be sent with your next message.');
   });
 
   $('newSessionBtn').addEventListener('click', async () => {
@@ -145,6 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. IMPORTANT: Re-apply parameters immediately
     await applyNow();
 
-    alert('New session started & parameters re-applied!');
+    showToast('New session started & parameters re-applied!');
   });
 });

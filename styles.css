@@ -30,7 +30,8 @@ h2 {
 /* Layout Containers */
 .app-container {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: 380px 1fr;
+  /* Sidebar first */
   height: 100vh;
   gap: 0;
 }
@@ -38,7 +39,6 @@ h2 {
 .main-content {
   padding: 40px;
   overflow-y: auto;
-  border-right: 1px solid var(--border-color);
 }
 
 .sidebar {
@@ -46,6 +46,8 @@ h2 {
   background-color: #111827;
   /* Slightly darker than main */
   overflow-y: auto;
+  border-right: 1px solid var(--border-color);
+  /* Border moved to right of sidebar */
 }
 
 .panel {
@@ -173,12 +175,11 @@ code {
   font-family: inherit;
 }
 
-/* Chatbot Positioning - MOVED TO LEFT */
+/* Chatbot Positioning - MOVED TO RIGHT TO AVOID OVERLAP */
 df-messenger-chat-bubble {
   position: fixed !important;
-  left: 24px !important;
-  /* Moved to left side */
-  right: auto !important;
+  right: 24px !important;
+  left: auto !important;
   bottom: 24px !important;
   z-index: 999999 !important;
   --df-messenger-chat-window-width: 380px;

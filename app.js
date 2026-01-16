@@ -128,6 +128,9 @@ document.addEventListener('DOMContentLoaded', () => {
       queryInput: {
         event: { event: "session-sync" },
         languageCode: $('language').value || "en"
+      },
+      queryParams: {
+        parameters: params
       }
     });
 
@@ -158,6 +161,9 @@ document.addEventListener('DOMContentLoaded', () => {
         queryInput: {
           event: { event: "WELCOME_EVENT" },
           languageCode: $('language').value || "en"
+        },
+        queryParams: {
+          parameters: params
         }
       });
     }, 100);

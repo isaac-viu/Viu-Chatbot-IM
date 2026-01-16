@@ -31,6 +31,10 @@ async function buildParams() {
     // required params
     language: $('language').value,
 
+    // user info
+    userId: $('userId').value,
+    userTier: $('userTier').value,
+
     // extra context params
     device: isMobile() ? "mobile" : "desktop",
     pageUrl: location.href
@@ -78,8 +82,11 @@ window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-mes
 document.addEventListener('DOMContentLoaded', () => {
   renderOut();
 
-  ['language', 'region', 'omitRegion'].forEach(id => {
+  ['language', 'region', 'omitRegion', 'userId', 'userTier'].forEach(id => {
     $(id).addEventListener('change', renderOut);
+    if (id === 'userId') {
+      $(id).addEventListener('input', renderOut);
+    }
   });
 
   async function applyNow() {

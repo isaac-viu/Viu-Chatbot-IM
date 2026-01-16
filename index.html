@@ -52,6 +52,24 @@
       <button id="newSessionBtn">Start new session</button>
     </div>
 
+    <div class="row">
+      <label>
+        User ID (12 digits)
+        <input type="text" id="userId" value="123456789012" maxlength="12" />
+      </label>
+
+      <label>
+        User Tier
+        <select id="userTier">
+          <option value="0">0</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+      </label>
+    </div>
+
     <p class="muted">
       • <b>Apply</b>: Sets parameters for the next message.<br />
       • <b>Start new session</b>: Clears history (use after Apply for a fresh start).<br />

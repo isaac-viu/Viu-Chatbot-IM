@@ -91,6 +91,16 @@ window.addEventListener('df-response-received', (e) => {
   }
 });
 
+window.addEventListener('df-messenger-loaded', async () => {
+  console.log('[debug] df-messenger-loaded');
+  const df = getDf();
+  if (df) {
+    const params = await buildParams();
+    df.setQueryParameters({ parameters: params });
+    console.log('[Init] Early parameters set on load');
+  }
+});
+
 window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -134,14 +144,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const df = getDf();
     if (!df) return;
 
-    // Reset welcome flag so 'intent' attribute or manual triggers can fire again if needed
-    welcomeSent = false;
+    // 1. Set parameters FIRST so the next request (WELCOME_EVENT) has them
+    const params = await buildParams();
+    df.setQueryParameters({ parameters: params });
 
-    // 1. Start new session
+    // 2. Start new session (this triggers WELCOME_EVENT with the parameters)
     df.startNewSession();
-
-    // 2. IMPORTANT: Re-apply and sync parameters immediately
-    await applyNow();
 
     showToast('New session started & parameters synced!');
   });

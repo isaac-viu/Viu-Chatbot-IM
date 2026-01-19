@@ -180,11 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('[New Session] setQueryParameters delayed:', params);
 
       // 3. Send a text query to force parameter transmission (hidden from UI)
-      df.sendQuery("Syncing parameters...");
+      df.sendQuery("Hello");
       console.log('[New Session] Sent sync query');
 
       // Attempt to hide this message from the UI
-      hideLastUserMessage();
+
     }, 500);
 
     showToast('New session started & parameters synced!');

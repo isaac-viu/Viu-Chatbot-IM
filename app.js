@@ -79,7 +79,9 @@ window.addEventListener('df-request-sent', (e) => {
   const body = e?.detail?.data?.requestBody;
   if (body) {
     console.log('[debug] df-request-sent requestBody:', body);
-    $('debug-out').textContent = JSON.stringify(body, null, 2);
+    const existing = $('debug-out').textContent;
+    const newEntry = `--- Request at ${new Date().toLocaleTimeString()} ---\n${JSON.stringify(body, null, 2)}\n\n`;
+    $('debug-out').textContent = newEntry + existing;
   }
 });
 
@@ -87,7 +89,9 @@ window.addEventListener('df-response-received', (e) => {
   const body = e?.detail?.data;
   if (body) {
     console.log('[debug] df-response-received:', body);
-    $('debug-in').textContent = JSON.stringify(body, null, 2);
+    const existing = $('debug-in').textContent;
+    const newEntry = `--- Response at ${new Date().toLocaleTimeString()} ---\n${JSON.stringify(body, null, 2)}\n\n`;
+    $('debug-in').textContent = newEntry + existing;
   }
 });
 

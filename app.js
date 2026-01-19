@@ -157,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Manually send WELCOME_EVENT
       df.sendRequest('event', {
         event: "WELCOME_EVENT",
-        languageCode: $('language').value || "en"
+        languageCode: $('language').value || "en",
+        parameters: params
       });
     }, 500);
 

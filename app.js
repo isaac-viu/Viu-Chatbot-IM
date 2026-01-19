@@ -18,6 +18,27 @@ function isMobile() {
   return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 }
 
+function hideLastUserMessage() {
+  setTimeout(() => {
+    try {
+      const df = $('df-messenger');
+      const chat = df.shadowRoot?.querySelector('df-messenger-chat-bubble')?.shadowRoot?.querySelector('df-messenger-chat-window') || df.shadowRoot?.querySelector('df-messenger-chat-window');
+      const msgList = chat?.shadowRoot?.querySelector('df-message-list');
+      const messages = msgList?.shadowRoot?.querySelectorAll('.message-list .message');
+
+      if (messages && messages.length > 0) {
+        const lastMsg = messages[messages.length - 1];
+        if (lastMsg) {
+          lastMsg.style.display = 'none';
+          console.log('[UI] Hidden last user message');
+        }
+      }
+    } catch (e) {
+      console.log('[UI] Could not hide message:', e);
+    }
+  }, 100);
+}
+
 async function getBrowserInfo() {
   let browserBrand = "";
   let browserVersion = "";
@@ -158,10 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
       df.setQueryParameters({ parameters: params });
       console.log('[New Session] setQueryParameters delayed:', params);
 
-      // 3. Send a text query to force parameter transmission
-      // (Events seem to ignore queryParams in this version, so we use text)
-      df.sendQuery("Hello");
-      console.log('[New Session] Sent "Hello" query to sync params');
+      // 3. Send a text query to force parameter transmission (hidden from UI)
+      df.sendQuery("Syncing parameters...");
+      console.log('[New Session] Sent sync query');
+
+      // Attempt to hide this message from the UI
+      hideLastUserMessage();
     }, 500);
 
     showToast('New session started & parameters synced!');

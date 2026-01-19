@@ -158,12 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
       df.setQueryParameters({ parameters: params });
       console.log('[New Session] setQueryParameters delayed:', params);
 
-      // Manually send WELCOME_EVENT
-      df.sendRequest('event', {
-        event: "WELCOME_EVENT",
-        languageCode: $('language').value || "en",
-        parameters: params
-      });
+      // 3. Send a text query to force parameter transmission
+      // (Events seem to ignore queryParams in this version, so we use text)
+      df.sendQuery("Hello");
+      console.log('[New Session] Sent "Hello" query to sync params');
     }, 500);
 
     showToast('New session started & parameters synced!');

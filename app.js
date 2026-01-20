@@ -128,6 +128,21 @@ window.addEventListener('df-messenger-loaded', async () => {
 
 window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
 
+// Trigger Welcome only when chat is opened
+window.addEventListener('df-chat-open-changed', (e) => {
+  console.log('[debug] df-chat-open-changed', e.detail);
+  if (e.detail.isOpen && !welcomeSent) {
+    const df = getDf();
+    if (df) {
+      setTimeout(() => {
+        df.sendQuery("Hello");
+        welcomeSent = true;
+        console.log('[UI] Welcome sent on open');
+      }, 500); // Small delay to ensure animation finishes
+    }
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   renderOut();
 
@@ -170,6 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Start new session first (clears history)
     df.startNewSession();
+    welcomeSent = true; // Prevent auto-welcome if user manually resets
+
 
     // 2. Start manual initialization flow after a delay to ensure session is cleared
     // We move setQueryParameters INSIDE the timeout to avoid race conditions with startNewSession

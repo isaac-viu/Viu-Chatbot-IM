@@ -204,18 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 200);
 
-    // 3. Send "Hello" after a delay to ensure UI is ready to show it
-    setTimeout(async () => {
-      try {
-        const freshDf = getDf();
-        if (freshDf) {
-          freshDf.sendQuery("Hello");
-          console.log('[New Session] Sent "Hello" query');
-        }
-      } catch (err) {
-        console.error('[New Session] Error sending hello:', err);
-      }
-    }, 1000);
+
 
     showToast('New session started & parameters synced!');
   });

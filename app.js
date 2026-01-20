@@ -61,6 +61,15 @@ async function getBrowserInfo() {
   return { browserBrand, browserVersion };
 }
 
+function updateLanguage() {
+  const lang = $('language').value;
+  const df = getDf();
+  if (df) {
+    df.setAttribute('language-code', lang);
+    console.log('[UI] Language updated to:', lang);
+  }
+}
+
 async function buildParams() {
   const base = {
     // required params
@@ -151,9 +160,13 @@ window.addEventListener('df-chat-open-changed', async (e) => {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderOut();
+  updateLanguage();
 
   ['language', 'region', 'omitRegion', 'userId', 'userTier', 'debugMode'].forEach(id => {
-    $(id).addEventListener('change', renderOut);
+    $(id).addEventListener('change', () => {
+      renderOut();
+      if (id === 'language') updateLanguage();
+    });
     if (id === 'userId') {
       $(id).addEventListener('input', renderOut);
     }

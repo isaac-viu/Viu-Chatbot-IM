@@ -129,16 +129,20 @@ window.addEventListener('df-messenger-loaded', async () => {
 window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
 
 // Trigger Welcome only when chat is opened
-window.addEventListener('df-chat-open-changed', (e) => {
+window.addEventListener('df-chat-open-changed', async (e) => {
   console.log('[debug] df-chat-open-changed', e.detail);
   if (e.detail.isOpen && !welcomeSent) {
     const df = getDf();
     if (df) {
-      setTimeout(() => {
-        df.sendQuery("Hello");
-        welcomeSent = true;
-        console.log('[UI] Welcome sent on open');
-      }, 500); // Small delay to ensure animation finishes
+      // User request: send a request with welcome event
+      const params = await buildParams();
+      df.sendRequest('event', {
+        event: "WELCOME_EVENT",
+        languageCode: $('language').value || "en",
+        parameters: params
+      });
+      welcomeSent = true;
+      console.log('[UI] WELCOME_EVENT sent on open');
     }
   }
 });
@@ -179,33 +183,16 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Applied and synced! The bot now knows your parameters.');
   });
 
-  $('newSessionBtn').addEventListener('click', async () => {
+  $('newSessionBtn').addEventListener('click', () => {
     const df = getDf();
     if (!df) return;
 
-    // 1. Start new session first (clears history)
+    // 1. Start new session (clears history)
     df.startNewSession();
-    welcomeSent = true; // Prevent auto-welcome if user manually resets
 
+    // Reset welcome flag so it can fire again if the chat is re-opened
+    welcomeSent = false;
 
-    // 2. Start manual initialization flow after a delay to ensure session is cleared
-    // We move setQueryParameters INSIDE the timeout to avoid race conditions with startNewSession
-    // 2. Set parameters ASAP to minimize "dead zone" where user might type without params
-    setTimeout(async () => {
-      try {
-        const freshDf = getDf();
-        if (freshDf) {
-          const params = await buildParams();
-          freshDf.setQueryParameters({ parameters: params });
-          console.log('[New Session] Params re-applied immediately:', params);
-        }
-      } catch (e) {
-        console.error('[New Session] Error setting params:', e);
-      }
-    }, 200);
-
-
-
-    showToast('New session started & parameters synced!');
+    showToast('New session started (Silent)');
   });
 });

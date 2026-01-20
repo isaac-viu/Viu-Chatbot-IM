@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Error sending sync message: ' + err.message);
       }
 
-    }, 1000);
+    }, 5000);
 
     showToast('New session started & parameters synced!');
   });

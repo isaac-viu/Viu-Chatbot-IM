@@ -173,30 +173,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Start manual initialization flow after a delay to ensure session is cleared
     // We move setQueryParameters INSIDE the timeout to avoid race conditions with startNewSession
+    // 2. Set parameters ASAP to minimize "dead zone" where user might type without params
     setTimeout(async () => {
       try {
-        // Re-fetch DF to ensure fresh reference
         const freshDf = getDf();
-        if (!freshDf) {
-          console.error('[New Session] df-messenger not found in timeout');
-          return;
+        if (freshDf) {
+          const params = await buildParams();
+          freshDf.setQueryParameters({ parameters: params });
+          console.log('[New Session] Params re-applied immediately:', params);
         }
-
-        // Re-build and Re-set parameters
-        const params = await buildParams();
-        freshDf.setQueryParameters({ parameters: params });
-        console.log('[New Session] setQueryParameters delayed:', params);
-
-        // 3. Send a text query to force parameter transmission
-        // Use standard text to ensure parameters are attached
-        freshDf.sendQuery("Hello");
-        console.log('[New Session] Sent "Hello" query');
-      } catch (err) {
-        console.error('[New Session] Error in timeout:', err);
-        showToast('Error sending sync message: ' + err.message);
+      } catch (e) {
+        console.error('[New Session] Error setting params:', e);
       }
+    }, 200);
 
-    }, 5000);
+    // 3. Send "Hello" after a delay to ensure UI is ready to show it
+    setTimeout(async () => {
+      try {
+        const freshDf = getDf();
+        if (freshDf) {
+          freshDf.sendQuery("Hello");
+          console.log('[New Session] Sent "Hello" query');
+        }
+      } catch (err) {
+        console.error('[New Session] Error sending hello:', err);
+      }
+    }, 1000);
 
     showToast('New session started & parameters synced!');
   });

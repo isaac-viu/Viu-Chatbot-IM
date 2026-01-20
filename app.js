@@ -146,10 +146,13 @@ window.addEventListener('df-chat-open-changed', async (e) => {
       // User request: send a request with welcome event
       const params = await buildParams();
 
-      // 1. Set parameters first so they are attached to the event
+      // 1. Force language update to ensure correct locale
+      updateLanguage();
+
+      // 2. Set parameters first so they are attached to the event
       df.setQueryParameters({ parameters: params });
 
-      // 2. Send event by name (String)
+      // 3. Send event by name (String)
       df.sendRequest('event', "WELCOME_EVENT");
 
       welcomeSent = true;
@@ -178,14 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const params = await buildParams();
 
-    // 1. Set parameters for future messages
+    // 1. Force language update
+    updateLanguage();
+
+    // 2. Set parameters for future messages
     df.setQueryParameters({ parameters: params });
 
-    // 2. Proactively sync parameters by sending an event
+    // 3. Proactively sync parameters by sending an event
     // This makes the bot "know" the parameters immediately without user typing.
     df.sendRequest('event', {
       event: "session-sync",
-      languageCode: $('language').value || "en",
       parameters: params
     });
 

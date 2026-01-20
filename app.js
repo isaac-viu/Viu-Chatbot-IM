@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Attempt to hide this message from the UI
 
-    }, 500);
+    }, 1000);
 
     showToast('New session started & parameters synced!');
   });

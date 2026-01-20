@@ -136,11 +136,13 @@ window.addEventListener('df-chat-open-changed', async (e) => {
     if (df) {
       // User request: send a request with welcome event
       const params = await buildParams();
-      df.sendRequest('event', {
-        event: "WELCOME_EVENT",
-        languageCode: $('language').value || "en",
-        parameters: params
-      });
+
+      // 1. Set parameters first so they are attached to the event
+      df.setQueryParameters({ parameters: params });
+
+      // 2. Send event by name (String)
+      df.sendRequest('event', "WELCOME_EVENT");
+
       welcomeSent = true;
       console.log('[UI] WELCOME_EVENT sent on open');
     }

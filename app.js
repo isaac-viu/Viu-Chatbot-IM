@@ -189,10 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Proactively sync parameters by sending an event
     // This makes the bot "know" the parameters immediately without user typing.
-    df.sendRequest('event', {
-      event: "session-sync",
-      parameters: params
-    });
+    df.sendRequest('event', "session-sync");
 
     console.log('[Apply] setQueryParameters and sent session-sync event:', params);
     return params;

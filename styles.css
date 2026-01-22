@@ -241,3 +241,46 @@ df-messenger-chat-bubble {
 df-messenger {
   z-index: 999999 !important;
 }
+
+/* 📱 Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    /* Allow scrolling on mobile */
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding: 20px;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    box-sizing: border-box;
+    /* Ensure padding doesn't break width */
+  }
+
+  .main-content {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  df-messenger-chat-bubble {
+    right: 16px !important;
+    bottom: 16px !important;
+    /* Adjust bubble size if valid variables, else just position */
+    --df-messenger-chat-window-width: 90vw;
+    --df-messenger-chat-window-height: 80vh;
+  }
+
+  h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  pre {
+    max-height: 300px;
+  }
+}

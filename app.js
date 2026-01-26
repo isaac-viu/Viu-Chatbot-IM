@@ -219,8 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Start new session (clears history)
     df.startNewSession();
 
-    // Reset welcome flag so it can fire again if the chat is re-opened
+    // 2. Reset welcome flag so it can fire again if the chat is re-opened
     welcomeSent = false;
+
+    // 3. Close the chat window to simulate a complete reset
+    df.removeAttribute('expand');
 
     showToast('New session started (Silent)');
   });

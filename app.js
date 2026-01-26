@@ -81,7 +81,7 @@ async function buildParams() {
     isDebugMode: $('debugMode').checked,
 
     // extra context params
-    device: isMobile() ? "mobile" : "desktop",
+    device: $('deviceType').value,
     pageUrl: location.href
   };
 
@@ -162,10 +162,19 @@ window.addEventListener('df-chat-open-changed', async (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Auto-detect device on load to set default
+  if (isMobile()) {
+    if (/iPhone|iPad/i.test(navigator.userAgent)) {
+      $('deviceType').value = 'ios_app';
+    } else if (/Android/i.test(navigator.userAgent)) {
+      $('deviceType').value = 'android_app';
+    }
+  }
+
   renderOut();
   updateLanguage();
 
-  ['language', 'region', 'omitRegion', 'userId', 'userTier', 'debugMode'].forEach(id => {
+  ['language', 'deviceType', 'region', 'omitRegion', 'userId', 'userTier', 'debugMode'].forEach(id => {
     $(id).addEventListener('change', () => {
       renderOut();
       if (id === 'language') updateLanguage();
@@ -189,7 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Proactively sync parameters by sending an event
     // This makes the bot "know" the parameters immediately without user typing.
-    df.sendRequest('event', "session-sync");
+    df.sendRequest('event', {
+      event: "session-sync",
+      parameters: params
+    });
 
     console.log('[Apply] setQueryParameters and sent session-sync event:', params);
     return params;

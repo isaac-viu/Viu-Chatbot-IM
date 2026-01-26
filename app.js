@@ -212,6 +212,37 @@ document.addEventListener('DOMContentLoaded', () => {
     showToast('Applied and synced! The bot now knows your parameters.');
   });
 
+  function closeChat() {
+    const df = getDf();
+    if (!df) return;
+
+    // Method 1: Remove attribute (standard MD behavior)
+    df.removeAttribute('expand');
+
+    // Method 2: Set property (if component syncs prop)
+    // @ts-ignore
+    df.expanded = false;
+
+    // Method 3: Shadow DOM deep access (last resort hack)
+    try {
+      const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
+      if (bubble) {
+        bubble.removeAttribute('expanded');
+        // @ts-ignore
+        bubble.expanded = false;
+
+        // Try to find a close button inside
+        const chatWindow = bubble.shadowRoot?.querySelector('df-messenger-chat-window');
+        if (chatWindow) {
+          // Some versions use an 'expanded' attribute on the window itself
+          chatWindow.removeAttribute('expanded');
+        }
+      }
+    } catch (e) {
+      console.log('[UI] Error closing chat:', e);
+    }
+  }
+
   $('newSessionBtn').addEventListener('click', () => {
     const df = getDf();
     if (!df) return;
@@ -223,7 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     welcomeSent = false;
 
     // 3. Close the chat window to simulate a complete reset
-    df.removeAttribute('expand');
+    closeChat();
 
     showToast('New session started (Silent)');
   });

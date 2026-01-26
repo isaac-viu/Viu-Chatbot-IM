@@ -77,6 +77,7 @@ async function buildParams() {
 
     // user info
     userId: $('userId').value,
+    email: $('email').value,
     userTier: $('userTier').value,
     isDebugMode: $('debugMode').checked,
 
@@ -174,12 +175,12 @@ document.addEventListener('DOMContentLoaded', () => {
   renderOut();
   updateLanguage();
 
-  ['language', 'deviceType', 'region', 'omitRegion', 'userId', 'userTier', 'debugMode'].forEach(id => {
+  ['language', 'deviceType', 'region', 'omitRegion', 'userId', 'email', 'userTier', 'debugMode'].forEach(id => {
     $(id).addEventListener('change', () => {
       renderOut();
       if (id === 'language') updateLanguage();
     });
-    if (id === 'userId') {
+    if (id === 'userId' || id === 'email') {
       $(id).addEventListener('input', renderOut);
     }
   });

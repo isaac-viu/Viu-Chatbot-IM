@@ -185,34 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  async function applyNow() {
-    const df = getDf();
-    if (!df) return;
-
-    const params = await buildParams();
-
-    // 1. Force language update
-    updateLanguage();
-
-    // 2. Set parameters for future messages
-    df.setQueryParameters({ parameters: params });
-
-    // 3. Proactively sync parameters by sending an event
-    // This makes the bot "know" the parameters immediately without user typing.
-    df.sendRequest('event', {
-      event: "session-sync",
-      parameters: params
-    });
-
-    console.log('[Apply] setQueryParameters and sent session-sync event:', params);
-    return params;
-  }
-
-  $('applyBtn').addEventListener('click', async () => {
-    await applyNow();
-    showToast('Applied and synced! The bot now knows your parameters.');
-  });
-
   function closeChat() {
     const df = getDf();
     if (!df) return;

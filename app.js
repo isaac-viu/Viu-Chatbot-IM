@@ -100,6 +100,31 @@ async function getBrowserInfo() {
     } else if (/Windows/i.test(ua)) {
       if (!info.osPlatform) info.osPlatform = "Windows";
     }
+
+    // 3. Fallback Browser Name detection (if Client Hints didn't work)
+    if (!info.browserBrand) {
+      if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
+        info.browserBrand = "Chrome";
+        const match = ua.match(/Chrome\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      } else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) {
+        info.browserBrand = "Safari";
+        const match = ua.match(/Version\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      } else if (/Firefox/i.test(ua)) {
+        info.browserBrand = "Firefox";
+        const match = ua.match(/Firefox\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      } else if (/Edg/i.test(ua) && !/Edge/i.test(ua)) { // Edge (Chromium)
+        info.browserBrand = "Edge";
+        const match = ua.match(/Edg\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      } else if (/Edge/i.test(ua)) { // Legacy Edge
+        info.browserBrand = "Edge";
+        const match = ua.match(/Edge\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      }
+    }
   }
 
   return info;

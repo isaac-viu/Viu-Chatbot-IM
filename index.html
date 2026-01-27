@@ -27,75 +27,87 @@
     <aside class="sidebar">
       <h2>Control Panel</h2>
       <div class="panel">
-        <div class="control-group">
-          <label>Region</label>
-          <select id="region">
-            <option value="Singapore">Singapore</option>
-            <option value="South Africa">South Africa</option>
-          </select>
-        </div>
+        <!-- Group 1: Context -->
+        <details open>
+          <summary>Context & Device</summary>
+          <div class="control-group">
+            <label>Region</label>
+            <select id="region">
+              <option value="Singapore">Singapore</option>
+              <option value="South Africa">South Africa</option>
+            </select>
+          </div>
 
-        <div class="control-group">
-          <label>Language</label>
-          <select id="language">
-            <option value="en">English</option>
-            <option value="zh-cn">Chinese (Simplified)</option>
-            <option value="ms">Malay</option>
-            <option value="ja">Japanese</option>
-          </select>
-        </div>
+          <div class="control-group">
+            <label>Language</label>
+            <select id="language">
+              <option value="en">English</option>
+              <option value="zh-cn">Chinese (Simplified)</option>
+              <option value="ms">Malay</option>
+              <option value="ja">Japanese</option>
+            </select>
+          </div>
 
-        <div class="control-group">
-          <label>Device Type</label>
-          <select id="deviceType">
-            <option value="web">Web</option>
-            <option value="ios_app">iOS App</option>
-            <option value="android_app">Android App</option>
-            <option value="tv_app">TV App</option>
-          </select>
-        </div>
+          <div class="control-group">
+            <label>Device Type</label>
+            <select id="deviceType">
+              <option value="web">Web</option>
+              <option value="ios_app">iOS App</option>
+              <option value="android_app">Android App</option>
+              <option value="tv_app">TV App</option>
+            </select>
+          </div>
+        </details>
 
-        <div class="control-group">
-          <label>User ID (12 digits)</label>
-          <input type="text" id="userId" value="123456789012" maxlength="12" />
-        </div>
+        <!-- Group 2: User -->
+        <details open>
+          <summary>User Identity</summary>
+          <div class="control-group">
+            <label>User ID (12 digits)</label>
+            <input type="text" id="userId" value="123456789012" maxlength="12" />
+          </div>
 
-        <div class="control-group">
-          <label>Email</label>
-          <input type="text" id="email" value="test@example.com" />
-        </div>
+          <div class="control-group">
+            <label>Email</label>
+            <input type="text" id="email" value="test@example.com" />
+          </div>
 
-        <div class="control-group">
-          <label>User Tier</label>
-          <select id="userTier">
-            <option value="0">0</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-          </select>
-        </div>
+          <div class="control-group">
+            <label>User Tier</label>
+            <select id="userTier">
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
+          </div>
+        </details>
 
-        <div class="control-group">
-          <label class="toggle-container">
-            <input type="checkbox" id="omitRegion" />
-            Omit region (fallback)
-          </label>
-        </div>
+        <!-- Group 3: Settings -->
+        <details>
+          <summary>Settings</summary>
+          <div class="control-group">
+            <label class="toggle-container">
+              <input type="checkbox" id="omitRegion" />
+              Omit region (fallback)
+            </label>
+          </div>
 
-        <div class="control-group">
-          <label class="toggle-container">
-            <input type="checkbox" id="skipWelcome" />
-            Skip Welcome Event
-          </label>
-        </div>
+          <div class="control-group">
+            <label class="toggle-container">
+              <input type="checkbox" id="skipWelcome" />
+              Skip Welcome Event
+            </label>
+          </div>
 
-        <div class="control-group">
-          <label class="toggle-container">
-            <input type="checkbox" id="debugMode" />
-            Debug Mode
-          </label>
-        </div>
+          <div class="control-group">
+            <label class="toggle-container">
+              <input type="checkbox" id="debugMode" />
+              Debug Mode
+            </label>
+          </div>
+        </details>
 
         <div class="button-group">
           <button id="newSessionBtn">Start new session</button>

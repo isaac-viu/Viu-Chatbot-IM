@@ -195,27 +195,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const df = getDf();
     if (!df) return;
 
-    // Method 1: Remove attribute (standard MD behavior)
+    console.log('[UI] Attempting to close chat...');
+
+    // Method 1: Standard attribute (sometimes works)
     df.removeAttribute('expand');
 
-    // Method 2: Set property (if component syncs prop)
+    // Method 2: Property
     // @ts-ignore
     df.expanded = false;
 
-    // Method 3: Shadow DOM deep access (last resort hack)
+    // Method 3: Shadow DOM deep dive
     try {
       const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
       if (bubble) {
+        // 3a. Attribute/Prop on bubble
         bubble.removeAttribute('expanded');
         // @ts-ignore
         bubble.expanded = false;
 
-        // Try to find a close button inside
+        // 3b. Try to find the close/minimize button and click it
+        // The structure varies, but usually there's a button with an icon or aria-label
         const chatWindow = bubble.shadowRoot?.querySelector('df-messenger-chat-window');
         if (chatWindow) {
-          // Some versions use an 'expanded' attribute on the window itself
           chatWindow.removeAttribute('expanded');
+
+          // Try closing via identifying the close button inside the window header
+          const closeBtn = chatWindow.shadowRoot?.querySelector('button[aria-label="Close"], button.close, .minimise-icon');
+          if (closeBtn) {
+            console.log('[UI] Found close button, clicking...');
+            closeBtn.click();
+          }
         }
+
+        // 3c. Try bubbling close event (last resort)
+        bubble.dispatchEvent(new CustomEvent('df-chat-close', { bubbles: true, composed: true }));
       }
     } catch (e) {
       console.log('[UI] Error closing chat:', e);

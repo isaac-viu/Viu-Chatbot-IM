@@ -103,7 +103,15 @@ async function getBrowserInfo() {
 
     // 3. Fallback Browser Name detection (if Client Hints didn't work)
     if (!info.browserBrand) {
-      if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
+      if (/CriOS/i.test(ua)) { // Chrome on iOS
+        info.browserBrand = "Chrome (iOS)";
+        const match = ua.match(/CriOS\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      } else if (/FxiOS/i.test(ua)) { // Firefox on iOS
+        info.browserBrand = "Firefox (iOS)";
+        const match = ua.match(/FxiOS\/(\d+)/);
+        if (match) info.browserVersion = match[1];
+      } else if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) {
         info.browserBrand = "Chrome";
         const match = ua.match(/Chrome\/(\d+)/);
         if (match) info.browserVersion = match[1];

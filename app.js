@@ -142,6 +142,14 @@ window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-mes
 window.addEventListener('df-chat-open-changed', async (e) => {
   console.log('[debug] df-chat-open-changed', e.detail);
   if (e.detail.isOpen && !welcomeSent) {
+    // Check if user wants to skip welcome
+    if ($('skipWelcome').checked) {
+      console.log('[UI] Skipping WELCOME_EVENT (Checkbox is checked)');
+      // We set welcomeSent = true so it doesn't fire later if they uncheck it and re-open without new session
+      welcomeSent = true;
+      return;
+    }
+
     const df = getDf();
     if (df) {
       // User request: send a request with welcome event

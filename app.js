@@ -171,11 +171,9 @@ window.addEventListener('df-chat-open-changed', async (e) => {
 document.addEventListener('DOMContentLoaded', () => {
   // Auto-detect device on load to set default
   if (isMobile()) {
-    if (/iPhone|iPad/i.test(navigator.userAgent)) {
-      $('deviceType').value = 'ios_app';
-    } else if (/Android/i.test(navigator.userAgent)) {
-      $('deviceType').value = 'android_app';
-    }
+    $('deviceType').value = 'mobileWeb';
+  } else {
+    $('deviceType').value = 'pcWeb';
   }
 
   renderOut();

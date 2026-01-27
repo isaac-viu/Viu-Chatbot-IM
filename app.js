@@ -142,26 +142,24 @@ window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-mes
 window.addEventListener('df-chat-open-changed', async (e) => {
   console.log('[debug] df-chat-open-changed', e.detail);
   if (e.detail.isOpen && !welcomeSent) {
-    // Check if user wants to skip welcome
-    if ($('skipWelcome').checked) {
-      console.log('[UI] Skipping WELCOME_EVENT (Checkbox is checked)');
-      // We set welcomeSent = true so it doesn't fire later if they uncheck it and re-open without new session
-      welcomeSent = true;
-      return;
-    }
-
     const df = getDf();
     if (df) {
-      // User request: send a request with welcome event
-      const params = await buildParams();
-
       // 1. Force language update to ensure correct locale
       updateLanguage();
 
-      // 2. Set parameters first so they are attached to the event
+      // 2. Set parameters first so they are attached to the session
+      const params = await buildParams();
       df.setQueryParameters({ parameters: params });
+      console.log('[UI] Parameters set on chat open');
 
-      // 3. Send event by name (String)
+      // 3. Check if user wants to skip welcome
+      if ($('skipWelcome').checked) {
+        console.log('[UI] Skipping WELCOME_EVENT (Checkbox is checked)');
+        welcomeSent = true;
+        return;
+      }
+
+      // 4. Send event by name (String) if not skipped
       df.sendRequest('event', "WELCOME_EVENT");
 
       welcomeSent = true;

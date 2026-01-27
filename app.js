@@ -55,7 +55,12 @@ async function getBrowserInfo() {
         "fullVersionList", "uaFullVersion", "model", "platform", "platformVersion"
       ]);
       const brands = high.fullVersionList || navigator.userAgentData.brands || [];
-      const main = brands.find(b => !/Not.*Brand/i.test(b.brand)) || brands[0] || {};
+
+      // Prioritize specific brands over generic "Chromium"
+      const specificBrand = brands.find(b =>
+        /Google Chrome|Microsoft Edge|Opera|Brave/i.test(b.brand)
+      );
+      const main = specificBrand || brands.find(b => !/Not.*Brand/i.test(b.brand)) || brands[0] || {};
 
       info.browserBrand = main.brand || "";
       info.browserVersion = high.uaFullVersion || main.version || "";

@@ -40,25 +40,69 @@ function hideLastUserMessage() {
 }
 
 async function getBrowserInfo() {
-  let browserBrand = "";
-  let browserVersion = "";
+  let info = {
+    browserBrand: "",
+    browserVersion: "",
+    deviceModel: "",
+    osPlatform: "",
+    osVersion: ""
+  };
 
-  // Try Network Information API (UA Client Hints) - works in Chrome/Edge
-  if (navigator.userAgentData?.getHighEntropyValues) {
+  // 1. Try Modern API (Client Hints) - Chrome, Edge, Android Webview
+  if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
     try {
       const high = await navigator.userAgentData.getHighEntropyValues([
-        "fullVersionList", "uaFullVersion"
+        "fullVersionList", "uaFullVersion", "model", "platform", "platformVersion"
       ]);
       const brands = high.fullVersionList || navigator.userAgentData.brands || [];
       const main = brands.find(b => !/Not.*Brand/i.test(b.brand)) || brands[0] || {};
-      browserBrand = main.brand || "";
-      browserVersion = high.uaFullVersion || main.version || "";
+
+      info.browserBrand = main.brand || "";
+      info.browserVersion = high.uaFullVersion || main.version || "";
+      info.deviceModel = high.model || "";      // e.g., "Pixel 6"
+      info.osPlatform = high.platform || "";    // e.g., "Android"
+      info.osVersion = high.platformVersion || "";
     } catch (e) {
-      // ignore
+      console.log('UA Data error', e);
     }
   }
 
-  return { browserBrand, browserVersion };
+  // 2. Fallback / Augment with User Agent string (Safari, Firefox, Old Android)
+  // If Client Hints didn't provide the model/platform, try regex
+  if (!info.deviceModel || !info.osPlatform || !info.osVersion) {
+    const ua = navigator.userAgent;
+
+    if (/iPhone/i.test(ua)) {
+      info.deviceModel = "iPhone";
+      info.osPlatform = "iOS";
+      const match = ua.match(/OS (\d+[._]\d+)/);
+      if (match) info.osVersion = match[1].replace(/_/g, '.');
+    } else if (/iPad/i.test(ua)) {
+      info.deviceModel = "iPad";
+      info.osPlatform = "iOS";
+      const match = ua.match(/OS (\d+[._]\d+)/);
+      if (match) info.osVersion = match[1].replace(/_/g, '.');
+    } else if (/Mac/i.test(ua)) {
+      if (!info.deviceModel) info.deviceModel = "Mac"; // Client hints might say "MacIntel" or empty
+      if (!info.osPlatform) info.osPlatform = "macOS";
+    } else if (/Android/i.test(ua)) {
+      if (!info.osPlatform) info.osPlatform = "Android";
+
+      const vMatch = ua.match(/Android\s([0-9.]+)/);
+      if (vMatch && !info.osVersion) info.osVersion = vMatch[1];
+
+      // Try to find model in UA (standard format: "Android x.x; Model Name Build/...")
+      const mMatch = ua.match(/Android\s[0-9.]+;\s([^;]+)\)/); // Simple capture
+      if (mMatch && !info.deviceModel) {
+        // Sometimes usually "SM-G998B" or "Pixel 6"
+        info.deviceModel = mMatch[1].trim().split(' Build')[0];
+      }
+    } else if (/Windows/i.test(ua)) {
+      if (!info.osPlatform) info.osPlatform = "Windows";
+    }
+  }
+
+  return info;
 }
 
 function updateLanguage() {

@@ -191,63 +191,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  function closeChat() {
-    const df = getDf();
-    if (!df) return;
-
-    console.log('[UI] Attempting to close chat...');
-
-    // Method 1: Standard attribute (sometimes works)
-    df.removeAttribute('expand');
-
-    // Method 2: Property
-    // @ts-ignore
-    df.expanded = false;
-
-    // Method 3: Shadow DOM deep dive
-    try {
-      const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
-      if (bubble) {
-        // 3a. Attribute/Prop on bubble
-        bubble.removeAttribute('expanded');
-        // @ts-ignore
-        bubble.expanded = false;
-
-        // 3b. Try to find the close/minimize button and click it
-        // The structure varies, but usually there's a button with an icon or aria-label
-        const chatWindow = bubble.shadowRoot?.querySelector('df-messenger-chat-window');
-        if (chatWindow) {
-          chatWindow.removeAttribute('expanded');
-
-          // Try closing via identifying the close button inside the window header
-          const closeBtn = chatWindow.shadowRoot?.querySelector('button[aria-label="Close"], button.close, .minimise-icon');
-          if (closeBtn) {
-            console.log('[UI] Found close button, clicking...');
-            closeBtn.click();
-          }
-        }
-
-        // 3c. Try bubbling close event (last resort)
-        bubble.dispatchEvent(new CustomEvent('df-chat-close', { bubbles: true, composed: true }));
-      }
-    } catch (e) {
-      console.log('[UI] Error closing chat:', e);
-    }
-  }
-
   $('newSessionBtn').addEventListener('click', () => {
-    const df = getDf();
-    if (!df) return;
+    const oldDf = getDf();
+    if (!oldDf) return;
 
-    // 1. Start new session (clears history)
-    df.startNewSession();
+    // 1. Capture attributes to restore later
+    const projectId = oldDf.getAttribute('project-id');
+    const agentId = oldDf.getAttribute('agent-id');
+    const langCode = oldDf.getAttribute('language-code');
+    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
 
-    // 2. Reset welcome flag so it can fire again if the chat is re-opened
-    welcomeSent = false;
+    console.log('[UI] Performing Hard Reset (Re-mounting component)...');
 
-    // 3. Close the chat window to simulate a complete reset
-    closeChat();
+    // 2. Clear session (attempt)
+    try { oldDf.startNewSession(); } catch (e) { }
 
-    showToast('New session started (Silent)');
+    // 3. Remove old component
+    oldDf.remove();
+    welcomeSent = false; // Reset logic flag
+
+    // 4. Re-create component after short delay
+    setTimeout(() => {
+      const newDf = document.createElement('df-messenger');
+      newDf.setAttribute('project-id', projectId);
+      newDf.setAttribute('agent-id', agentId);
+      newDf.setAttribute('language-code', langCode);
+      newDf.setAttribute('max-query-length', '256');
+
+      // Re-create the bubble inside
+      const bubble = document.createElement('df-messenger-chat-bubble');
+      bubble.setAttribute('chat-title', chatTitle);
+      bubble.setAttribute('anchor', 'top-left');
+      bubble.setAttribute('allow-fullscreen', 'small');
+
+      newDf.appendChild(bubble);
+      document.body.appendChild(newDf);
+
+      showToast('New session started (Hard Reset)');
+      console.log('[UI] Component re-mounted.');
+    }, 100);
   });
 });

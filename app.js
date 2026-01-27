@@ -175,8 +175,6 @@ async function buildParams() {
 
   // Add browser info (brand & version only)
   const browser = await getBrowserInfo();
-  // Include raw User Agent for debugging
-  browser.userAgent = navigator.userAgent;
   return { ...base, ...browser };
 }
 

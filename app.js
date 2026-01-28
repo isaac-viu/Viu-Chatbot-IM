@@ -291,10 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
     sessionStorage.clear();
     localStorage.clear();
 
-    // 3. Wipe Memory
-    sessionStorage.clear();
-    localStorage.clear();
-
     // 4. Safety Delay: Wait 200ms for the "End Session" network signal to leave
     // before destroying the component.
     setTimeout(() => {

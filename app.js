@@ -305,6 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
         newDf.setAttribute('language-code', langCode);
         newDf.setAttribute('max-query-length', '256');
 
+        // FORCE NEW SESSION ID to prevent ghost sessions
+        const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        newDf.setAttribute('session-id', newSessionId);
+
         // Re-create the bubble inside
         const bubble = document.createElement('df-messenger-chat-bubble');
         bubble.setAttribute('chat-title', chatTitle);

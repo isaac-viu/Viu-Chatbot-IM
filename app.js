@@ -286,7 +286,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Clear session (attempt)
     try { oldDf.startNewSession(); } catch (e) { }
 
-    // 3. Remove old component
+    // 3. Wipe Memory (Fix for "Ghost Sessions")
+    // This prevents the new bot from finding old session IDs in storage
+    sessionStorage.clear();
+    localStorage.clear();
+
+    // 4. Remove old component
     oldDf.remove();
     welcomeSent = false; // Reset logic flag
 

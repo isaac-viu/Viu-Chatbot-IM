@@ -320,7 +320,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showToast('New session started (Hard Reset)');
         console.log('[UI] Component re-mounted.');
-      }, 50); // Short delay for DOM
-    }, 200);
+      }, 200); // Short delay for DOM
+    }, 500);
   });
 });

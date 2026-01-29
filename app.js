@@ -242,13 +242,13 @@ window.addEventListener('df-chat-open-changed', async (e) => {
       }
 
       // 4. Send event by name (String) if not skipped
-      // df.sendRequest('event', "WELCOME_EVENT");
+      df.sendRequest('event', "WELCOME_EVENT");
 
       // Switch to "Hi" query for more reliable greeting
-      df.sendRequest('query', "Hi");
+      // df.sendRequest('query', "Hi");
 
       welcomeSent = true;
-      console.log('[UI] "Hi" query sent on open');
+      console.log('[UI] WELCOME_EVENT sent on open');
     }
   }
 });

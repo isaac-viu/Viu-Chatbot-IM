@@ -294,36 +294,33 @@ document.addEventListener('DOMContentLoaded', () => {
     sessionStorage.clear();
     localStorage.clear();
 
-    // 4. Safety Delay: Wait 200ms for the "End Session" network signal to leave
-    // before destroying the component.
+    // 4. Remove old component
+    oldDf.remove();
+    welcomeSent = false;
+
+    // 5. Re-create component after short delay
     setTimeout(() => {
-      oldDf.remove();
-      welcomeSent = false;
+      const newDf = document.createElement('df-messenger');
+      newDf.setAttribute('project-id', projectId);
+      newDf.setAttribute('agent-id', agentId);
+      newDf.setAttribute('language-code', langCode);
+      newDf.setAttribute('max-query-length', '256');
 
-      // 5. Re-create component
-      setTimeout(() => {
-        const newDf = document.createElement('df-messenger');
-        newDf.setAttribute('project-id', projectId);
-        newDf.setAttribute('agent-id', agentId);
-        newDf.setAttribute('language-code', langCode);
-        newDf.setAttribute('max-query-length', '256');
+      // FORCE NEW SESSION ID to prevent ghost sessions
+      const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+      newDf.setAttribute('session-id', newSessionId);
 
-        // FORCE NEW SESSION ID to prevent ghost sessions
-        const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        newDf.setAttribute('session-id', newSessionId);
+      // Re-create the bubble inside
+      const bubble = document.createElement('df-messenger-chat-bubble');
+      bubble.setAttribute('chat-title', chatTitle);
+      bubble.setAttribute('anchor', 'top-left');
+      bubble.setAttribute('allow-fullscreen', 'small');
 
-        // Re-create the bubble inside
-        const bubble = document.createElement('df-messenger-chat-bubble');
-        bubble.setAttribute('chat-title', chatTitle);
-        bubble.setAttribute('anchor', 'top-left');
-        bubble.setAttribute('allow-fullscreen', 'small');
+      newDf.appendChild(bubble);
+      document.body.appendChild(newDf);
 
-        newDf.appendChild(bubble);
-        document.body.appendChild(newDf);
-
-        showToast('New session started (Hard Reset)');
-        console.log('[UI] Component re-mounted.');
-      }, 200); // Short delay for DOM
-    }, 500);
+      showToast('New session started (Hard Reset)');
+      console.log('[UI] Component re-mounted.');
+    }, 50);
   });
 });

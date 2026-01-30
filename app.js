@@ -212,6 +212,12 @@ window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
   const df = getDf();
   if (df) {
+    // Fix: Use new JS API for GCS Uploads (replaces deprecated gcs-upload attribute)
+    if (globalThis.dfInstallUtil) {
+      globalThis.dfInstallUtil('gcs-bucket-upload', { bucketName: 'viu-pmo-poc-chat-uploads' });
+      console.log('[Init] GCS Upload Utility installed');
+    }
+
     const params = await buildParams();
     df.setQueryParameters({ parameters: params });
     console.log('[Init] Early parameters set on load');
@@ -282,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectId = oldDf.getAttribute('project-id');
     const agentId = oldDf.getAttribute('agent-id');
     const langCode = oldDf.getAttribute('language-code');
-    const gcsUpload = oldDf.getAttribute('gcs-upload'); // Capture GCS bucket
+    // const gcsUpload = oldDf.getAttribute('gcs-upload'); // Deprecated
     const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
 
     console.log('[UI] Performing Hard Reset (Re-mounting component)...');
@@ -306,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
       newDf.setAttribute('agent-id', agentId);
       newDf.setAttribute('language-code', langCode);
       newDf.setAttribute('max-query-length', '256');
-      if (gcsUpload) newDf.setAttribute('gcs-upload', gcsUpload); // Restore GCS bucket
+      // if (gcsUpload) newDf.setAttribute('gcs-upload', gcsUpload); // Deprecated - handled by dfInstallUtil on load
 
       // FORCE NEW SESSION ID to prevent ghost sessions
       const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;

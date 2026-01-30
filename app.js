@@ -282,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectId = oldDf.getAttribute('project-id');
     const agentId = oldDf.getAttribute('agent-id');
     const langCode = oldDf.getAttribute('language-code');
+    const gcsUpload = oldDf.getAttribute('gcs-upload'); // Capture GCS bucket
     const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
 
     console.log('[UI] Performing Hard Reset (Re-mounting component)...');
@@ -305,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
       newDf.setAttribute('agent-id', agentId);
       newDf.setAttribute('language-code', langCode);
       newDf.setAttribute('max-query-length', '256');
+      if (gcsUpload) newDf.setAttribute('gcs-upload', gcsUpload); // Restore GCS bucket
 
       // FORCE NEW SESSION ID to prevent ghost sessions
       const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -315,6 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
       bubble.setAttribute('chat-title', chatTitle);
       bubble.setAttribute('anchor', 'top-left');
       bubble.setAttribute('allow-fullscreen', 'small');
+
+      // Enable features on new bubble
+      bubble.setAttribute('enable-file-upload', '');
+      bubble.setAttribute('enable-audio-input', '');
 
       newDf.appendChild(bubble);
       document.body.appendChild(newDf);

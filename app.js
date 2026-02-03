@@ -334,7 +334,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Wipe Memory (Fix for "Ghost Sessions")
     // This prevents the new bot from finding old session IDs in storage
     sessionStorage.clear();
-    localStorage.clear();
+    // Don't clear localStorage (we want to keep Lifetime Session Count)
+    // localStorage.clear();
+
+    // Reset message count for the new session
+    sessionStorage.setItem('messageCount', 0);
+    sessionStorage.setItem('sessionInitialized', 'true'); // Mark as active
+    incrementSessionCount(); // Use our helper to increment lifetime count
 
     // 4. Remove old component
     oldDf.remove();

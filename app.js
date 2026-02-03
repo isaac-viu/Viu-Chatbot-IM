@@ -189,6 +189,7 @@ function getDf() {
 
 // Debug hooks: Show ACTUAL JSON sent/received to/from Google in the UI
 window.addEventListener('df-request-sent', (e) => {
+  incrementMessageCount(); // Count the message!
   const body = e?.detail?.data?.requestBody;
   if (body) {
     console.log('[debug] df-request-sent requestBody:', body);
@@ -208,8 +209,42 @@ window.addEventListener('df-response-received', (e) => {
   }
 });
 
+// --- Stats Logic ---
+function updateStatsDisplay() {
+  $('sessionCountDisplay').textContent = localStorage.getItem('sessionCount') || 0;
+  $('messageCountDisplay').textContent = sessionStorage.getItem('messageCount') || 0;
+}
+
+function incrementMessageCount() {
+  let count = parseInt(sessionStorage.getItem('messageCount') || 0) + 1;
+  sessionStorage.setItem('messageCount', count);
+  updateStatsDisplay();
+}
+
+function incrementSessionCount() {
+  let count = parseInt(localStorage.getItem('sessionCount') || 0) + 1;
+  localStorage.setItem('sessionCount', count);
+  updateStatsDisplay();
+}
+// -------------------
+
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
+
+  // Track Session Count (Lifetime)
+  // We only increment if this is a "clean load" or hard reset, but df-messenger-loaded fires on every refresh.
+  // For simplicity, we treat every load as a session start/continuation.
+  // To avoid double counting on simple refreshes, we could use session cookies, but user asked for "Count".
+  // Let's increment on load for now, assuming "Load = Session".
+  // actually, safer to just display current state here, and increment only on explicit "New Session" or first visit.
+  // Let's count "Loads" as "Sessions" for this POC.
+  if (!sessionStorage.getItem('sessionInitialized')) {
+    incrementSessionCount();
+    sessionStorage.setItem('sessionInitialized', 'true');
+    sessionStorage.setItem('messageCount', 0); // Reset messages on new session
+  }
+  updateStatsDisplay();
+
   const df = getDf();
   if (df) {
     // Fix: Use new JS API for GCS Uploads (replaces deprecated gcs-upload attribute)

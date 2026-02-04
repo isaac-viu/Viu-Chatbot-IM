@@ -174,8 +174,16 @@ async function buildParams() {
   }
 
   // Add browser info (brand & version only)
+  // Add browser info (brand & version only)
   const browser = await getBrowserInfo();
-  return { ...base, ...browser };
+
+  // Add stats (for local preview visibility)
+  const stats = {
+    session_count: parseInt(localStorage.getItem('sessionCount') || 0),
+    message_count: parseInt(sessionStorage.getItem('messageCount') || 0)
+  };
+
+  return { ...base, ...browser, ...stats };
 }
 
 async function renderOut() {

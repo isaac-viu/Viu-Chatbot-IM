@@ -324,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const agentId = oldDf.getAttribute('agent-id');
     const langCode = oldDf.getAttribute('language-code');
     // const gcsUpload = oldDf.getAttribute('gcs-upload'); // Deprecated
-    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
+    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Viu Services Bot"; // Fallback if bubble missing
 
     console.log('[UI] Performing Hard Reset (Re-mounting component)...');
 

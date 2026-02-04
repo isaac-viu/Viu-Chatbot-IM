@@ -240,6 +240,29 @@ df-messenger-chat-bubble {
 
 df-messenger {
   z-index: 999999 !important;
+  /* Light Theme Variables for Cathay Style */
+  --df-messenger-button-titlebar-color: #f3f4f6;
+  --df-messenger-button-titlebar-font-color: #1f2937;
+  --df-messenger-chat-background-color: #ffffff;
+  --df-messenger-font-color: #1f2937;
+  --df-messenger-send-icon: #00887e;
+  --df-messenger-user-message-background: #e5e7eb;
+  --df-messenger-bot-message-background: #f3f4f6;
+}
+
+/* Subtitle Hack: "Powered by Generative AI" */
+/* We can't easily access Shadow DOM, but we can try to append content if container allows. 
+   Verify if df-messenger allows ::after on the main container or if we need a workaround. 
+   Standard df-messenger shadow DOM is closed. Best bet is using the title itself or an overlay.
+   Let's try a pure CSS overlay on top of the chat window wrapper if possible, 
+   or just append it to the body near the messenger.
+*/
+
+/* Trying to inject subtitle via title attribute hack? No, let's use a pseudo-element on the messenger itself if it's open. */
+/* Custom styling for the bubble */
+df-messenger-chat-bubble {
+  --df-messenger-titlebar-title-font-size: 18px;
+  --df-messenger-titlebar-title-font-weight: 600;
 }
 
 /* Collapsible Sections */

@@ -348,6 +348,9 @@ window.addEventListener('df-chat-open-changed', async (e) => {
   }
 });
 
+// Button Listener
+$('newSessionBtn').addEventListener('click', resetSession);
+
 document.addEventListener('DOMContentLoaded', () => {
   // Auto-detect device on load to set default
   if (isMobile()) {
@@ -367,32 +370,5 @@ document.addEventListener('DOMContentLoaded', () => {
     if (id === 'userId' || id === 'email') {
       $(id).addEventListener('input', renderOut);
     }
-  });
-
-  newDf.setAttribute('agent-id', agentId);
-  newDf.setAttribute('language-code', langCode);
-  newDf.setAttribute('max-query-length', '256');
-  // if (gcsUpload) newDf.setAttribute('gcs-upload', gcsUpload); // Deprecated - handled by dfInstallUtil on load
-
-  // FORCE NEW SESSION ID to prevent ghost sessions
-  const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-  newDf.setAttribute('session-id', newSessionId);
-
-  // Re-create the bubble inside
-  const bubble = document.createElement('df-messenger-chat-bubble');
-  bubble.setAttribute('chat-title', chatTitle);
-  bubble.setAttribute('anchor', 'top-left');
-  bubble.setAttribute('allow-fullscreen', 'small');
-
-  // Enable features on new bubble
-  bubble.setAttribute('enable-file-upload', '');
-  bubble.setAttribute('enable-audio-input', '');
-
-  newDf.appendChild(bubble);
-  document.body.appendChild(newDf);
-
-  showToast('New session started (Hard Reset)');
-  console.log('[UI] Component re-mounted.');
-}, 50);
   });
 });

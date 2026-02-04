@@ -189,7 +189,6 @@ function getDf() {
 
 // Debug hooks: Show ACTUAL JSON sent/received to/from Google in the UI
 window.addEventListener('df-request-sent', (e) => {
-  incrementMessageCount(); // Count the message!
   const body = e?.detail?.data?.requestBody;
   if (body) {
     console.log('[debug] df-request-sent requestBody:', body);
@@ -230,21 +229,6 @@ function incrementSessionCount() {
 
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
-
-  // Track Session Count (Lifetime)
-  // We only increment if this is a "clean load" or hard reset, but df-messenger-loaded fires on every refresh.
-  // For simplicity, we treat every load as a session start/continuation.
-  // To avoid double counting on simple refreshes, we could use session cookies, but user asked for "Count".
-  // Let's increment on load for now, assuming "Load = Session".
-  // actually, safer to just display current state here, and increment only on explicit "New Session" or first visit.
-  // Let's count "Loads" as "Sessions" for this POC.
-  if (!sessionStorage.getItem('sessionInitialized')) {
-    incrementSessionCount();
-    sessionStorage.setItem('sessionInitialized', 'true');
-    sessionStorage.setItem('messageCount', 0); // Reset messages on new session
-  }
-  updateStatsDisplay();
-
   const df = getDf();
   if (df) {
     // Fix: Use new JS API for GCS Uploads (replaces deprecated gcs-upload attribute)
@@ -324,9 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const agentId = oldDf.getAttribute('agent-id');
     const langCode = oldDf.getAttribute('language-code');
     // const gcsUpload = oldDf.getAttribute('gcs-upload'); // Deprecated
-    const oldBubble = $('df-messenger-chat-bubble');
-    const chatTitle = oldBubble?.getAttribute('chat-title') || "Demo Bot";
-    const chatIcon = oldBubble?.getAttribute('chat-icon');
+    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
 
     console.log('[UI] Performing Hard Reset (Re-mounting component)...');
 
@@ -336,13 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Wipe Memory (Fix for "Ghost Sessions")
     // This prevents the new bot from finding old session IDs in storage
     sessionStorage.clear();
-    // Don't clear localStorage (we want to keep Lifetime Session Count)
-    // localStorage.clear();
-
-    // Reset message count for the new session
-    sessionStorage.setItem('messageCount', 0);
-    sessionStorage.setItem('sessionInitialized', 'true'); // Mark as active
-    incrementSessionCount(); // Use our helper to increment lifetime count
+    localStorage.clear();
 
     // 4. Remove old component
     oldDf.remove();
@@ -364,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Re-create the bubble inside
       const bubble = document.createElement('df-messenger-chat-bubble');
       bubble.setAttribute('chat-title', chatTitle);
-      if (chatIcon) bubble.setAttribute('chat-icon', chatIcon);
       bubble.setAttribute('anchor', 'top-left');
       bubble.setAttribute('allow-fullscreen', 'small');
 

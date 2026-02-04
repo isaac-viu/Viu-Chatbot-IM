@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="./styles.css" />
 
   <!-- DF Messenger -->
-  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
 
   <!-- External JS -->
   <script defer src="./app.js?v=4"></script>
@@ -109,18 +109,7 @@
           </div>
         </details>
 
-        <!-- Group 4: Stats -->
-        <details open>
-          <summary>Session Stats</summary>
-          <div class="control-group">
-            <label>Lifetime Sessions:</label>
-            <span id="sessionCountDisplay" style="font-weight: bold; float: right;">0</span>
-          </div>
-          <div class="control-group">
-            <label>Messages (Current):</label>
-            <span id="messageCountDisplay" style="font-weight: bold; float: right;">0</span>
-          </div>
-        </details>
+
 
         <div class="button-group">
           <button id="newSessionBtn">Start new session</button>
@@ -155,7 +144,7 @@
   <!-- Chatbot -->
   <df-messenger project-id="viu-pmo-poc" agent-id="d2fb0084-cb90-4de0-a8f1-caaed8f85603" language-code="en"
     max-query-length="256">
-    <df-messenger-chat-bubble chat-title="Hello there 👋" anchor="top-left" allow-fullscreen="small" enable-file-upload
+    <df-messenger-chat-bubble chat-title="Demo Bot" anchor="top-left" allow-fullscreen="small" enable-file-upload
       enable-audio-input>
     </df-messenger-chat-bubble>
   </df-messenger>

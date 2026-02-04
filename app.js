@@ -324,7 +324,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const agentId = oldDf.getAttribute('agent-id');
     const langCode = oldDf.getAttribute('language-code');
     // const gcsUpload = oldDf.getAttribute('gcs-upload'); // Deprecated
-    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
+    const oldBubble = $('df-messenger-chat-bubble');
+    const chatTitle = oldBubble?.getAttribute('chat-title') || "Demo Bot";
+    const chatIcon = oldBubble?.getAttribute('chat-icon');
 
     console.log('[UI] Performing Hard Reset (Re-mounting component)...');
 
@@ -362,6 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Re-create the bubble inside
       const bubble = document.createElement('df-messenger-chat-bubble');
       bubble.setAttribute('chat-title', chatTitle);
+      if (chatIcon) bubble.setAttribute('chat-icon', chatIcon);
       bubble.setAttribute('anchor', 'top-left');
       bubble.setAttribute('allow-fullscreen', 'small');
 

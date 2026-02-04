@@ -226,6 +226,13 @@ function incrementMessageCount() {
   sessionStorage.setItem('messageCount', count);
   updateStatsDisplay();
   syncCountsToDialogflow(); // Push logic
+
+  // Enforce Session Limit
+  if (count > 30) {
+    console.warn('[Limit] Session limit reached (30). Resetting...');
+    alert('Session Limit Reached (30 messages). Starting new session.');
+    resetSession();
+  }
 }
 
 function incrementSessionCount() {
@@ -362,65 +369,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  $('newSessionBtn').addEventListener('click', () => {
-    const oldDf = getDf();
-    if (!oldDf) return;
+  newDf.setAttribute('agent-id', agentId);
+  newDf.setAttribute('language-code', langCode);
+  newDf.setAttribute('max-query-length', '256');
+  // if (gcsUpload) newDf.setAttribute('gcs-upload', gcsUpload); // Deprecated - handled by dfInstallUtil on load
 
-    // 1. Capture attributes to restore later
-    const projectId = oldDf.getAttribute('project-id');
-    const agentId = oldDf.getAttribute('agent-id');
-    const langCode = oldDf.getAttribute('language-code');
-    // const gcsUpload = oldDf.getAttribute('gcs-upload'); // Deprecated
-    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot"; // Fallback if bubble missing
+  // FORCE NEW SESSION ID to prevent ghost sessions
+  const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  newDf.setAttribute('session-id', newSessionId);
 
-    console.log('[UI] Performing Hard Reset (Re-mounting component)...');
+  // Re-create the bubble inside
+  const bubble = document.createElement('df-messenger-chat-bubble');
+  bubble.setAttribute('chat-title', chatTitle);
+  bubble.setAttribute('anchor', 'top-left');
+  bubble.setAttribute('allow-fullscreen', 'small');
 
-    // 2. Clear session (attempt)
-    try { oldDf.startNewSession(); } catch (e) { }
+  // Enable features on new bubble
+  bubble.setAttribute('enable-file-upload', '');
+  bubble.setAttribute('enable-audio-input', '');
 
-    // 3. Wipe Memory (Fix for "Ghost Sessions")
-    // This prevents the new bot from finding old session IDs in storage
-    sessionStorage.clear();
-    // Don't clear localStorage (we want to keep Lifetime Session Count)
-    // localStorage.clear();
+  newDf.appendChild(bubble);
+  document.body.appendChild(newDf);
 
-    // Reset message count for the new session
-    sessionStorage.setItem('messageCount', 0);
-    sessionStorage.setItem('sessionInitialized', 'true'); // Mark as active
-    incrementSessionCount(); // Use our helper to increment lifetime count
-
-    // 4. Remove old component
-    oldDf.remove();
-    welcomeSent = false;
-
-    // 5. Re-create component after short delay
-    setTimeout(() => {
-      const newDf = document.createElement('df-messenger');
-      newDf.setAttribute('project-id', projectId);
-      newDf.setAttribute('agent-id', agentId);
-      newDf.setAttribute('language-code', langCode);
-      newDf.setAttribute('max-query-length', '256');
-      // if (gcsUpload) newDf.setAttribute('gcs-upload', gcsUpload); // Deprecated - handled by dfInstallUtil on load
-
-      // FORCE NEW SESSION ID to prevent ghost sessions
-      const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-      newDf.setAttribute('session-id', newSessionId);
-
-      // Re-create the bubble inside
-      const bubble = document.createElement('df-messenger-chat-bubble');
-      bubble.setAttribute('chat-title', chatTitle);
-      bubble.setAttribute('anchor', 'top-left');
-      bubble.setAttribute('allow-fullscreen', 'small');
-
-      // Enable features on new bubble
-      bubble.setAttribute('enable-file-upload', '');
-      bubble.setAttribute('enable-audio-input', '');
-
-      newDf.appendChild(bubble);
-      document.body.appendChild(newDf);
-
-      showToast('New session started (Hard Reset)');
-      console.log('[UI] Component re-mounted.');
-    }, 50);
+  showToast('New session started (Hard Reset)');
+  console.log('[UI] Component re-mounted.');
+}, 50);
   });
 });

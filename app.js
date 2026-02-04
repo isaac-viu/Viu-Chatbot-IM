@@ -235,12 +235,66 @@ function incrementMessageCount() {
   }
 }
 
-function incrementSessionCount() {
-  let count = parseInt(localStorage.getItem('sessionCount') || 0) + 1;
-  localStorage.setItem('sessionCount', count);
-  updateStatsDisplay();
-  // We don't sync here immediately because the component might be re-rendering, 
-  // but buildParams calls will pick it up, or the next message will.
+}
+
+function resetSession() {
+  const oldDf = getDf();
+  if (!oldDf) return;
+
+  // 1. Capture attributes to restore later
+  const projectId = oldDf.getAttribute('project-id');
+  const agentId = oldDf.getAttribute('agent-id');
+  const langCode = oldDf.getAttribute('language-code');
+  const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot";
+
+  console.log('[UI] Performing Hard Reset (Re-mounting component)...');
+
+  // 2. Clear session (attempt)
+  try { oldDf.startNewSession(); } catch (e) { }
+
+  // 3. Wipe Memory
+  sessionStorage.clear();
+  // Don't clear localStorage (we want to keep Lifetime Session Count)
+
+  // Reset message count for the new session
+  sessionStorage.setItem('messageCount', 0);
+  sessionStorage.setItem('sessionInitialized', 'true');
+  incrementSessionCount();
+
+  // 4. Remove old component
+  oldDf.remove();
+  welcomeSent = false;
+
+  // 5. Re-create component after short delay
+  setTimeout(() => {
+    const newDf = document.createElement('df-messenger');
+    newDf.setAttribute('project-id', projectId);
+    newDf.setAttribute('agent-id', agentId);
+    newDf.setAttribute('language-code', langCode);
+    newDf.setAttribute('max-query-length', '256');
+
+    // FORCE NEW SESSION ID to prevent ghost sessions
+    const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    newDf.setAttribute('session-id', newSessionId);
+
+    const bubble = document.createElement('df-messenger-chat-bubble');
+    bubble.setAttribute('chat-title', chatTitle);
+    bubble.setAttribute('anchor', 'top-left');
+    bubble.setAttribute('allow-fullscreen', 'small');
+
+    // Enable features on new bubble
+    bubble.setAttribute('enable-file-upload', '');
+    bubble.setAttribute('enable-audio-input', '');
+
+    newDf.appendChild(bubble);
+    document.body.appendChild(newDf);
+
+    console.log('[UI] New component mounted with session-id:', newSessionId);
+    showToast('New session started (Hard Reset)');
+
+    // Refresh stats
+    updateStatsDisplay();
+  }, 50);
 }
 // -------------------
 
@@ -266,24 +320,7 @@ window.addEventListener('df-response-received', (e) => {
   }
 });
 
-// --- Stats Logic ---
-function updateStatsDisplay() {
-  $('sessionCountDisplay').textContent = localStorage.getItem('sessionCount') || 0;
-  $('messageCountDisplay').textContent = sessionStorage.getItem('messageCount') || 0;
-}
 
-function incrementMessageCount() {
-  let count = parseInt(sessionStorage.getItem('messageCount') || 0) + 1;
-  sessionStorage.setItem('messageCount', count);
-  updateStatsDisplay();
-}
-
-function incrementSessionCount() {
-  let count = parseInt(localStorage.getItem('sessionCount') || 0) + 1;
-  localStorage.setItem('sessionCount', count);
-  updateStatsDisplay();
-}
-// -------------------
 
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');

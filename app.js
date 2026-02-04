@@ -177,13 +177,7 @@ async function buildParams() {
   // Add browser info (brand & version only)
   const browser = await getBrowserInfo();
 
-  // Add stats (for local preview visibility)
-  const stats = {
-    session_count: parseInt(localStorage.getItem('sessionCount') || 0),
-    message_count: parseInt(sessionStorage.getItem('messageCount') || 0)
-  };
-
-  return { ...base, ...browser, ...stats };
+  return { ...base, ...browser };
 }
 
 async function renderOut() {
@@ -230,182 +224,219 @@ function incrementMessageCount() {
   // Enforce Session Limit
   if (count > 30) {
     console.warn('[Limit] Session limit reached (30). Resetting...');
-    alert('Session Limit Reached (30 messages). Starting new session.');
-    resetSession();
-  }
-}
-
-}
-
-function resetSession() {
-  const oldDf = getDf();
-  if (!oldDf) return;
-
-  // 1. Capture attributes to restore later
-  const projectId = oldDf.getAttribute('project-id');
-  const agentId = oldDf.getAttribute('agent-id');
-  const langCode = oldDf.getAttribute('language-code');
-  const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot";
-
-  console.log('[UI] Performing Hard Reset (Re-mounting component)...');
-
-  // 2. Clear session (attempt)
-  try { oldDf.startNewSession(); } catch (e) { }
-
-  // 3. Wipe Memory
-  sessionStorage.clear();
-  // Don't clear localStorage (we want to keep Lifetime Session Count)
-
-  // Reset message count for the new session
-  sessionStorage.setItem('messageCount', 0);
-  sessionStorage.setItem('sessionInitialized', 'true');
-  incrementSessionCount();
-
-  // 4. Remove old component
-  oldDf.remove();
-  welcomeSent = false;
-
-  // 5. Re-create component after short delay
-  setTimeout(() => {
-    const newDf = document.createElement('df-messenger');
-    newDf.setAttribute('project-id', projectId);
-    newDf.setAttribute('agent-id', agentId);
-    newDf.setAttribute('language-code', langCode);
-    newDf.setAttribute('max-query-length', '256');
-
-    // FORCE NEW SESSION ID to prevent ghost sessions
-    const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    newDf.setAttribute('session-id', newSessionId);
-
-    const bubble = document.createElement('df-messenger-chat-bubble');
-    bubble.setAttribute('chat-title', chatTitle);
-    bubble.setAttribute('anchor', 'top-left');
-    bubble.setAttribute('allow-fullscreen', 'small');
-
-    // Enable features on new bubble
-    bubble.setAttribute('enable-file-upload', '');
-    bubble.setAttribute('enable-audio-input', '');
-
-    newDf.appendChild(bubble);
-    document.body.appendChild(newDf);
-
-    console.log('[UI] New component mounted with session-id:', newSessionId);
-    showToast('New session started (Hard Reset)');
-
-    // Refresh stats
-    updateStatsDisplay();
-  }, 50);
-}
-// -------------------
-
-// Debug hooks: Show ACTUAL JSON sent/received to/from Google in the UI
-window.addEventListener('df-request-sent', (e) => {
-  incrementMessageCount(); // Count the message!
-  const body = e?.detail?.data?.requestBody;
-  if (body) {
-    console.log('[debug] df-request-sent requestBody:', body);
-    const existing = $('debug-out').textContent;
-    const newEntry = `--- Request at ${new Date().toLocaleTimeString()} ---\n${JSON.stringify(body, null, 2)}\n\n`;
-    $('debug-out').textContent = newEntry + existing;
-  }
-});
-
-window.addEventListener('df-response-received', (e) => {
-  const body = e?.detail?.data;
-  if (body) {
-    console.log('[debug] df-response-received:', body);
-    const existing = $('debug-in').textContent;
-    const newEntry = `--- Response at ${new Date().toLocaleTimeString()} ---\n${JSON.stringify(body, null, 2)}\n\n`;
-    $('debug-in').textContent = newEntry + existing;
-  }
-});
-
-
-
-window.addEventListener('df-messenger-loaded', async () => {
-  console.log('[debug] df-messenger-loaded');
-
-  // Track Session Count (Lifetime)
-  if (!sessionStorage.getItem('sessionInitialized')) {
-    incrementSessionCount();
-    sessionStorage.setItem('sessionInitialized', 'true');
-    sessionStorage.setItem('messageCount', 0); // Reset messages on new session
-  }
-  updateStatsDisplay();
-  // Ensure parameters are sent right away so the "Hi" message (if typed) or welcome event has them
-  // Note: df-messenger-loaded might be too early for setQueryParameters in some versions, but we'll try.
-  setTimeout(syncCountsToDialogflow, 1000); // 1s delay to be safe
-
-  const df = getDf();
-  if (df) {
-    // Fix: Use new JS API for GCS Uploads (replaces deprecated gcs-upload attribute)
-    if (globalThis.dfInstallUtil) {
-      globalThis.dfInstallUtil('gcs-bucket-upload', { bucketName: 'viu-pmo-poc-chat-uploads' });
-      console.log('[Init] GCS Upload Utility installed');
+    function incrementSessionCount() {
+      let count = parseInt(localStorage.getItem('sessionCount') || 0) + 1;
+      localStorage.setItem('sessionCount', count);
+      console.log('[Stats] Session Count:', count);
     }
 
-    const params = await buildParams();
-    df.setQueryParameters({ parameters: params });
-    console.log('[Init] Early parameters set on load');
-  }
-});
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'show';
+      setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+    }
 
-window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
+    function resetSession() {
+      const oldDf = getDf();
+      if (!oldDf) return;
 
-// Trigger Welcome only when chat is opened
-window.addEventListener('df-chat-open-changed', async (e) => {
-  console.log('[debug] df-chat-open-changed', e.detail);
-  if (e.detail.isOpen && !welcomeSent) {
-    const df = getDf();
-    if (df) {
-      // 1. Force language update to ensure correct locale
-      updateLanguage();
+      // 1. Capture attributes to restore later
+      const projectId = oldDf.getAttribute('project-id');
+      const agentId = oldDf.getAttribute('agent-id');
+      const langCode = oldDf.getAttribute('language-code');
+      const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot";
 
-      // 2. Set parameters first so they are attached to the session
-      const params = await buildParams();
-      df.setQueryParameters({ parameters: params });
-      console.log('[UI] Parameters set on chat open');
+      console.log('[UI] Performing Hard Reset (Re-mounting component)...');
 
-      // 3. Check if user wants to skip welcome
-      if ($('skipWelcome').checked) {
-        console.log('[UI] Skipping WELCOME_EVENT (Checkbox is checked)');
-        welcomeSent = true;
-        return;
+      // 2. Clear session (attempt)
+      try { oldDf.startNewSession(); } catch (e) { }
+
+      // 3. Wipe Memory
+      sessionStorage.clear();
+      localStorage.clear();
+
+      // 4. Remove old component
+      oldDf.remove();
+      welcomeSent = false;
+
+      // 5. Re-create component after short delay
+      setTimeout(() => {
+        const newDf = document.createElement('df-messenger');
+        newDf.setAttribute('project-id', projectId);
+        newDf.setAttribute('agent-id', agentId);
+        newDf.setAttribute('language-code', langCode);
+        newDf.setAttribute('max-query-length', '256');
+
+        // FORCE NEW SESSION ID to prevent ghost sessions
+        const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        newDf.setAttribute('session-id', newSessionId);
+
+        const bubble = document.createElement('df-messenger-chat-bubble');
+        bubble.setAttribute('chat-title', chatTitle);
+        bubble.setAttribute('anchor', 'top-left');
+        bubble.setAttribute('allow-fullscreen', 'small');
+
+        // Enable features on new bubble
+        bubble.setAttribute('enable-file-upload', '');
+        bubble.setAttribute('enable-audio-input', '');
+
+        newDf.appendChild(bubble);
+        document.body.appendChild(newDf);
+
+        console.log('[UI] New component mounted with session-id:', newSessionId);
+        showToast('New session started (Hard Reset)');
+      }, 50);
+    }
+    // -------------------
+
+    // Debug hooks: Show ACTUAL JSON sent/received to/from Google in the UI
+    window.addEventListener('df-request-sent', (e) => {
+      const body = e?.detail?.data?.requestBody;
+      if (body) {
+        console.log('[debug] df-request-sent requestBody:', body);
+        const existing = $('debug-out').textContent;
+        const newEntry = `--- Request at ${new Date().toLocaleTimeString()} ---\n${JSON.stringify(body, null, 2)}\n\n`;
+        $('debug-out').textContent = newEntry + existing;
+      }
+    });
+
+    window.addEventListener('df-response-received', (e) => {
+      const body = e?.detail?.data;
+      if (body) {
+        console.log('[debug] df-response-received:', body);
+        const existing = $('debug-in').textContent;
+        const newEntry = `--- Response at ${new Date().toLocaleTimeString()} ---\n${JSON.stringify(body, null, 2)}\n\n`;
+        $('debug-in').textContent = newEntry + existing;
+      }
+    });
+
+
+
+    window.addEventListener('df-messenger-loaded', async () => {
+      console.log('[debug] df-messenger-loaded');
+
+      const df = getDf();
+      if (df) {
+        // Fix: Use new JS API for GCS Uploads (replaces deprecated gcs-upload attribute)
+        if (globalThis.dfInstallUtil) {
+          globalThis.dfInstallUtil('gcs-bucket-upload', { bucketName: 'viu-pmo-poc-chat-uploads' });
+          console.log('[Init] GCS Upload Utility installed');
+        }
+
+        const params = await buildParams();
+        df.setQueryParameters({ parameters: params });
+        console.log('[Init] Early parameters set on load');
+      }
+    });
+
+    window.addEventListener('df-messenger-error', (e) => console.log('[debug] df-messenger-error:', e?.detail?.error || e));
+
+    // Trigger Welcome only when chat is opened
+    window.addEventListener('df-chat-open-changed', async (e) => {
+      console.log('[debug] df-chat-open-changed', e.detail);
+      if (e.detail.isOpen && !welcomeSent) {
+        const df = getDf();
+        if (df) {
+          // 1. Force language update to ensure correct locale
+          updateLanguage();
+
+          // 2. Set parameters first so they are attached to the session
+          const params = await buildParams();
+          df.setQueryParameters({ parameters: params });
+          console.log('[UI] Parameters set on chat open');
+
+          // 3. Check if user wants to skip welcome
+          if ($('skipWelcome').checked) {
+            console.log('[UI] Skipping WELCOME_EVENT (Checkbox is checked)');
+            welcomeSent = true;
+            return;
+          }
+
+          // 4. Send event by name (String) if not skipped
+          // df.sendRequest('event', "WELCOME_EVENT");
+
+          // Switch to "Hi" query for more reliable greeting
+          df.sendRequest('query', "Hi");
+
+          welcomeSent = true;
+          console.log('[UI] "Hi" query sent on open');
+        }
+      }
+    });
+
+    // Button Listener
+    $('newSessionBtn').addEventListener('click', () => {
+      const oldDf = getDf();
+      if (!oldDf) return;
+
+      // 1. Capture attributes to restore later
+      const projectId = oldDf.getAttribute('project-id');
+      const agentId = oldDf.getAttribute('agent-id');
+      const langCode = oldDf.getAttribute('language-code');
+      const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Demo Bot";
+
+      console.log('[UI] Performing Hard Reset (Re-mounting component)...');
+
+      // 2. Clear session (attempt)
+      try { oldDf.startNewSession(); } catch (e) { }
+
+      // 3. Wipe Memory (Fix for "Ghost Sessions")
+      // This prevents the new bot from finding old session IDs in storage
+      sessionStorage.clear();
+      localStorage.clear();
+
+      // 4. Remove old component
+      oldDf.remove();
+      welcomeSent = false;
+
+      // 5. Re-create component after short delay
+      setTimeout(() => {
+        const newDf = document.createElement('df-messenger');
+        newDf.setAttribute('project-id', projectId);
+        newDf.setAttribute('agent-id', agentId);
+        newDf.setAttribute('language-code', langCode);
+        newDf.setAttribute('max-query-length', '256');
+
+        // FORCE NEW SESSION ID to prevent ghost sessions
+        const newSessionId = `reset-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        newDf.setAttribute('session-id', newSessionId);
+
+        const bubble = document.createElement('df-messenger-chat-bubble');
+        bubble.setAttribute('chat-title', chatTitle);
+        bubble.setAttribute('anchor', 'top-left');
+        bubble.setAttribute('allow-fullscreen', 'small');
+
+        // Enable features on new bubble
+        bubble.setAttribute('enable-file-upload', '');
+        bubble.setAttribute('enable-audio-input', '');
+
+        newDf.appendChild(bubble);
+        document.body.appendChild(newDf);
+
+        showToast('New session started (Hard Reset)');
+        console.log('[UI] Component re-mounted.');
+      }, 50);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-detect device on load to set default
+      if (isMobile()) {
+        $('deviceType').value = 'mobileWeb';
+      } else {
+        $('deviceType').value = 'pcWeb';
       }
 
-      // 4. Send event by name (String) if not skipped
-      // df.sendRequest('event', "WELCOME_EVENT");
-
-      // Switch to "Hi" query for more reliable greeting
-      df.sendRequest('query', "Hi");
-
-      welcomeSent = true;
-      console.log('[UI] "Hi" query sent on open');
-    }
-  }
-});
-
-// Button Listener
-$('newSessionBtn').addEventListener('click', resetSession);
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Auto-detect device on load to set default
-  if (isMobile()) {
-    $('deviceType').value = 'mobileWeb';
-  } else {
-    $('deviceType').value = 'pcWeb';
-  }
-
-  renderOut();
-  updateLanguage();
-
-  ['language', 'deviceType', 'region', 'omitRegion', 'userId', 'email', 'userTier', 'debugMode'].forEach(id => {
-    $(id).addEventListener('change', () => {
       renderOut();
-      if (id === 'language') updateLanguage();
+      updateLanguage();
+
+      ['language', 'deviceType', 'region', 'omitRegion', 'userId', 'email', 'userTier', 'debugMode'].forEach(id => {
+        $(id).addEventListener('change', () => {
+          renderOut();
+          if (id === 'language') updateLanguage();
+        });
+        if (id === 'userId' || id === 'email') {
+          $(id).addEventListener('input', renderOut);
+        }
+      });
     });
-    if (id === 'userId' || id === 'email') {
-      $(id).addEventListener('input', renderOut);
-    }
-  });
-});

@@ -187,8 +187,50 @@ function getDf() {
   return document.querySelector('df-messenger');
 }
 
+
+// --- Stats Logic ---
+function updateStatsDisplay() {
+  $('sessionCountDisplay').textContent = localStorage.getItem('sessionCount') || 0;
+  $('messageCountDisplay').textContent = sessionStorage.getItem('messageCount') || 0;
+}
+
+function syncCountsToDialogflow() {
+  const df = getDf();
+  if (!df) return;
+
+  const sessionCount = parseInt(localStorage.getItem('sessionCount') || 0);
+  const messageCount = parseInt(sessionStorage.getItem('messageCount') || 0);
+
+  // Send counts as custom parameters to Dialogflow
+  // Note: These will be available in the session parameters as "session_count" and "message_count"
+  const params = {
+    session_count: sessionCount,
+    message_count: messageCount
+  };
+
+  df.setQueryParameters({ parameters: params });
+  console.log('[Stats] Synced to Dialogflow:', params);
+}
+
+function incrementMessageCount() {
+  let count = parseInt(sessionStorage.getItem('messageCount') || 0) + 1;
+  sessionStorage.setItem('messageCount', count);
+  updateStatsDisplay();
+  syncCountsToDialogflow(); // Push logic
+}
+
+function incrementSessionCount() {
+  let count = parseInt(localStorage.getItem('sessionCount') || 0) + 1;
+  localStorage.setItem('sessionCount', count);
+  updateStatsDisplay();
+  // We don't sync here immediately because the component might be re-rendering, 
+  // but buildParams calls will pick it up, or the next message will.
+}
+// -------------------
+
 // Debug hooks: Show ACTUAL JSON sent/received to/from Google in the UI
 window.addEventListener('df-request-sent', (e) => {
+  incrementMessageCount(); // Count the message!
   const body = e?.detail?.data?.requestBody;
   if (body) {
     console.log('[debug] df-request-sent requestBody:', body);
@@ -229,6 +271,18 @@ function incrementSessionCount() {
 
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
+
+  // Track Session Count (Lifetime)
+  if (!sessionStorage.getItem('sessionInitialized')) {
+    incrementSessionCount();
+    sessionStorage.setItem('sessionInitialized', 'true');
+    sessionStorage.setItem('messageCount', 0); // Reset messages on new session
+  }
+  updateStatsDisplay();
+  // Ensure parameters are sent right away so the "Hi" message (if typed) or welcome event has them
+  // Note: df-messenger-loaded might be too early for setQueryParameters in some versions, but we'll try.
+  setTimeout(syncCountsToDialogflow, 1000); // 1s delay to be safe
+
   const df = getDf();
   if (df) {
     // Fix: Use new JS API for GCS Uploads (replaces deprecated gcs-upload attribute)
@@ -318,7 +372,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Wipe Memory (Fix for "Ghost Sessions")
     // This prevents the new bot from finding old session IDs in storage
     sessionStorage.clear();
-    localStorage.clear();
+    // Don't clear localStorage (we want to keep Lifetime Session Count)
+    // localStorage.clear();
+
+    // Reset message count for the new session
+    sessionStorage.setItem('messageCount', 0);
+    sessionStorage.setItem('sessionInitialized', 'true'); // Mark as active
+    incrementSessionCount(); // Use our helper to increment lifetime count
 
     // 4. Remove old component
     oldDf.remove();

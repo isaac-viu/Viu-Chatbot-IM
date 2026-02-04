@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="./styles.css" />
 
   <!-- DF Messenger -->
-  <script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
+  <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
 
   <!-- External JS -->
   <script defer src="./app.js?v=4"></script>
@@ -155,9 +155,8 @@
   <!-- Chatbot -->
   <df-messenger project-id="viu-pmo-poc" agent-id="d2fb0084-cb90-4de0-a8f1-caaed8f85603" language-code="en"
     max-query-length="256">
-    <df-messenger-chat-bubble chat-title="Hello there 👋"
-      chat-icon="https://cdn-icons-png.flaticon.com/512/2645/2645897.png" anchor="top-left" allow-fullscreen="small"
-      enable-file-upload enable-audio-input>
+    <df-messenger-chat-bubble chat-title="Hello there 👋" anchor="top-left" allow-fullscreen="small" enable-file-upload
+      enable-audio-input>
     </df-messenger-chat-bubble>
   </df-messenger>
 

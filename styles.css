@@ -239,33 +239,55 @@ df-messenger-chat-bubble {
 }
 
 df-messenger {
-  z-index: 999999 !important;
-  /* Light Theme Variables for Cathay Style */
-  --df-messenger-button-titlebar-color: #f3f4f6;
-  --df-messenger-button-titlebar-font-color: #1f2937;
-  --df-messenger-chat-background-color: #ffffff;
-  --df-messenger-font-color: #1f2937;
-  --df-messenger-send-icon: #00887e;
-  --df-messenger-user-message-background: #e5e7eb;
+  z-index: 999;
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+
+  /* Color Theme (Green/Light as requested) */
+  --df-messenger-button-titlebar-color: #f0f4f0;
+  --df-messenger-button-titlebar-font-color: #333;
+  --df-messenger-chat-background-color: #fff;
+  --df-messenger-font-color: #333;
+  --df-messenger-send-icon: #2e7d32;
+  --df-messenger-user-message-background: #e8f5e9;
   --df-messenger-bot-message-background: #f3f4f6;
 }
 
-/* Subtitle Hack: "Powered by Generative AI" */
-/* We can't easily access Shadow DOM, but we can try to append content if container allows. 
-   Verify if df-messenger allows ::after on the main container or if we need a workaround. 
-   Standard df-messenger shadow DOM is closed. Best bet is using the title itself or an overlay.
-   Let's try a pure CSS overlay on top of the chat window wrapper if possible, 
-   or just append it to the body near the messenger.
-*/
-
-/* Trying to inject subtitle via title attribute hack? No, let's use a pseudo-element on the messenger itself if it's open. */
-/* Custom styling for the bubble */
-df-messenger-chat-bubble {
-  --df-messenger-titlebar-title-font-size: 18px;
-  --df-messenger-titlebar-title-font-weight: 600;
+/* Advanced Customization: Logo & Subtitle via Shadow DOM Parts */
+df-messenger::part(title-bar) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding-top: 20px;
+  /* Logo */
+  background-image: url('https://cdn-icons-png.flaticon.com/512/2645/2645897.png');
+  /* Placeholder Business Icon */
+  background-repeat: no-repeat;
+  background-position: center 10px;
+  background-size: 30px 30px;
+  height: 100px;
+  /* Taller title bar to fit logo + title + subtitle */
 }
 
-/* Collapsible Sections */
+/* Subtitle: "Powered by Generative AI" */
+df-messenger::part(title-bar)::after {
+  content: "Powered by Generative AI";
+  font-size: 10px;
+  color: #888;
+  margin-top: 2px;
+  font-weight: normal;
+}
+
+/* Chatbot Positioning - MOVED TO RIGHT TO AVOID OVERLAP */
+/* Note: When using bootstrap.js, df-messenger-chat-bubble might behave differently. 
+   We stick to standard df-messenger z-index. */
+df-messenger-chat-bubble {
+  /* No custom positioning here to avoid fighting the main tag */
+}
+
 details {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);

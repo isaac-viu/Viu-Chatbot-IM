@@ -200,6 +200,7 @@ function getDf() {
 function updateStatsDisplay() {
   $('sessionCountDisplay').textContent = localStorage.getItem('sessionCount') || 0;
   $('messageCountDisplay').textContent = sessionStorage.getItem('messageCount') || 0;
+  renderOut(); // Refresh the JSON Debug Console too!
 }
 
 function syncCountsToDialogflow() {

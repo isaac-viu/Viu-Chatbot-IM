@@ -228,6 +228,51 @@ function incrementSessionCount() {
 }
 // -------------------
 
+// --- UI Injection Logic ---
+function injectCustomUI() {
+  try {
+    const df = $('df-messenger');
+    const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
+    const chatWindow = bubble?.shadowRoot?.querySelector('df-messenger-chat-window') || df.shadowRoot?.querySelector('df-messenger-chat-window');
+
+    if (!chatWindow) return;
+
+    // 1. Inject Subtitle
+    // We look for the header element inside the chat window
+    const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');
+
+    // Avoid double injection
+    if (header && !header.querySelector('.custom-subtitle')) {
+      const subtitle = document.createElement('div');
+      subtitle.className = 'custom-subtitle';
+      subtitle.textContent = 'Powered by Generative AI';
+      subtitle.style.fontSize = '10px';
+      subtitle.style.opacity = '0.8';
+      subtitle.style.marginTop = '-4px';
+      subtitle.style.fontWeight = '400';
+      header.appendChild(subtitle);
+      console.log('[UI] Injected custom subtitle');
+    }
+
+    // 2. Force Timestamps (Global Style Injection into Shadow DOM)
+    // We inject a style tag into the chat window's shadow root
+    if (!chatWindow.shadowRoot.querySelector('#custom-styles')) {
+      const style = document.createElement('style');
+      style.id = 'custom-styles';
+      style.textContent = `
+        .message-list .message .time { display: block !important; opacity: 0.7; font-size: 10px; margin-top: 4px; }
+        .chat-wrapper > .chat-header { flex-direction: column; align-items: flex-start; justify-content: center; padding-left: 16px; min-height: 60px; }
+      `;
+      chatWindow.shadowRoot.appendChild(style);
+      console.log('[UI] Injected custom shadow styles');
+    }
+
+  } catch (e) {
+    console.log('[UI] Injection failed:', e);
+  }
+}
+// --------------------------
+
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
 
@@ -256,6 +301,9 @@ window.addEventListener('df-messenger-loaded', async () => {
     const params = await buildParams();
     df.setQueryParameters({ parameters: params });
     console.log('[Init] Early parameters set on load');
+
+    // Inject UI customizations
+    setTimeout(injectCustomUI, 1000);
   }
 });
 
@@ -290,6 +338,9 @@ window.addEventListener('df-chat-open-changed', async (e) => {
 
       welcomeSent = true;
       console.log('[UI] "Hi" query sent on open');
+
+      // Re-run injection in case of re-render
+      setTimeout(injectCustomUI, 500);
     }
   }
 });

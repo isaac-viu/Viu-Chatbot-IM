@@ -232,17 +232,32 @@ function incrementSessionCount() {
 function injectCustomUI() {
   try {
     const df = $('df-messenger');
-    if (!df) return false;
-
-    // Retry chain to find the chat window in Shadow DOM
-    const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
-    const chatWindow = bubble?.shadowRoot?.querySelector('df-messenger-chat-window')
-      || df.shadowRoot?.querySelector('df-messenger-chat-window');
-
-    if (!chatWindow) {
-      console.log('[UI] Chat Window not found yet...');
+    if (!df) {
+      console.log('[UI Debug] <df-messenger> not found in DOM.');
       return false;
     }
+
+    if (!df.shadowRoot) {
+      console.log('[UI Debug] <df-messenger> has no shadowRoot.');
+      return false;
+    }
+
+    // Retry chain to find the chat window in Shadow DOM
+    const bubble = df.shadowRoot.querySelector('df-messenger-chat-bubble');
+    if (!bubble) console.log('[UI Debug] <df-messenger-chat-bubble> not found in df.shadowRoot');
+
+    // Try finding window directly or via bubble
+    let chatWindow = df.shadowRoot.querySelector('df-messenger-chat-window');
+    if (!chatWindow && bubble && bubble.shadowRoot) {
+      chatWindow = bubble.shadowRoot.querySelector('df-messenger-chat-window');
+    }
+
+    if (!chatWindow) {
+      console.log('[UI Debug] <df-messenger-chat-window> not found. (Bubble exists: ' + !!bubble + ')');
+      return false;
+    }
+
+    console.log('[UI Debug] FOUND chatWindow!');
 
     // 1. Inject Header Elements (Logo + Subtitle)
     const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');
@@ -275,7 +290,12 @@ function injectCustomUI() {
         console.log('[UI] Subtitle injected');
       }
     } else {
-      console.log('[UI] Header not found in chat window');
+      console.log('[UI Debug] Header class not found in chatWindow.shadowRoot');
+      // List classes found to help debug
+      if (chatWindow.shadowRoot) {
+        const allTags = Array.from(chatWindow.shadowRoot.querySelectorAll('*')).map(e => e.tagName.toLowerCase() + '.' + e.className).join(', ');
+        console.log('[UI Debug] Tags found in chatWindow: ' + allTags.slice(0, 200) + '...');
+      }
     }
 
     // 2. Force Timestamps & Layout
@@ -302,7 +322,7 @@ function injectCustomUI() {
     return true; // Success
 
   } catch (e) {
-    console.log('[UI] Injection failed:', e);
+    console.log('[UI] Injection failed exception:', e);
     return false;
   }
 }
@@ -313,7 +333,7 @@ function startInjectionPoller() {
   const interval = setInterval(() => {
     attempts++;
     const success = injectCustomUI();
-    if (success || attempts > 20) { // Try for 10 seconds (20 * 500ms)
+    if (success || attempts > 20) {
       clearInterval(interval);
       if (!success) console.log('[UI] Giving up on injection after 20 attempts');
     }

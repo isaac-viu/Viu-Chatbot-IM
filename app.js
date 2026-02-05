@@ -219,14 +219,6 @@ function incrementMessageCount() {
   let count = parseInt(sessionStorage.getItem('messageCount') || 0) + 1;
   sessionStorage.setItem('messageCount', count);
   updateStatsDisplay();
-
-  // Enforce Session Limit: 30 messages
-  if (count >= 30) {
-    console.log('[Limit] Session limit reached (30 messages). resetting...');
-    alert('Session limit reached (30 messages). Starting a new session.');
-    // Reuse the existing Hard Reset logic
-    $('newSessionBtn').click();
-  }
 }
 
 function incrementSessionCount() {

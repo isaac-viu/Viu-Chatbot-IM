@@ -6,8 +6,8 @@
   --text-secondary: #94a3b8;
   --border-color: #334155;
   --input-bg: #334155;
-  --primary-color: #3b82f6;
-  --primary-hover: #2563eb;
+  --primary-color: #ffc003;
+  --primary-hover: #e6ac00;
   --surface-hover: #475569;
 }
 
@@ -126,7 +126,7 @@ button {
   cursor: pointer;
   transition: all 0.2s;
   background-color: var(--surface-hover);
-  color: white;
+  color: #f8fafc;
 }
 
 button:hover {
@@ -135,6 +135,8 @@ button:hover {
 
 #applyBtn {
   background-color: var(--primary-color);
+  color: #000000;
+  /* Black text on Yellow button */
 }
 
 #applyBtn:hover {
@@ -227,7 +229,7 @@ code {
   font-family: inherit;
 }
 
-/* Chatbot Positioning - MOVED TO RIGHT TO AVOID OVERLAP */
+/* Chatbot Positioning & Theme */
 df-messenger-chat-bubble {
   position: fixed !important;
   right: 24px !important;
@@ -236,58 +238,24 @@ df-messenger-chat-bubble {
   z-index: 999999 !important;
   --df-messenger-chat-window-width: 380px;
   --df-messenger-chat-window-height: 600px;
+
+  /* Theme Colors - Viu Yellow */
+  --df-messenger-button-titlebar-color: #ffc003;
+  --df-messenger-button-titlebar-text-color: #000000;
+  --df-messenger-user-message-body-color: #ffc003;
+  --df-messenger-user-message-body-text-color: #000000;
+  --df-messenger-chat-background-color: #ffffff;
 }
 
 df-messenger {
-  z-index: 999;
-  position: fixed;
-  bottom: 16px;
-  right: 16px;
-
-  /* Color Theme (Green/Light as requested) */
-  --df-messenger-button-titlebar-color: #f0f4f0;
-  --df-messenger-button-titlebar-font-color: #333;
-  --df-messenger-chat-background-color: #fff;
-  --df-messenger-font-color: #333;
-  --df-messenger-send-icon: #2e7d32;
-  --df-messenger-user-message-background: #e8f5e9;
-  --df-messenger-bot-message-background: #f3f4f6;
+  z-index: 999999 !important;
+  --df-messenger-button-titlebar-color: #ffc003;
+  --df-messenger-button-titlebar-text-color: #000000;
+  --df-messenger-user-message-body-color: #ffc003;
+  --df-messenger-user-message-body-text-color: #000000;
 }
 
-/* Advanced Customization: Logo & Subtitle via Shadow DOM Parts */
-df-messenger::part(title-bar) {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  padding-top: 20px;
-  /* Logo */
-  background-image: url('https://cdn-icons-png.flaticon.com/512/2645/2645897.png');
-  /* Placeholder Business Icon */
-  background-repeat: no-repeat;
-  background-position: center 10px;
-  background-size: 30px 30px;
-  height: 100px;
-  /* Taller title bar to fit logo + title + subtitle */
-}
-
-/* Subtitle: "Powered by Generative AI" */
-df-messenger::part(title-bar)::after {
-  content: "Powered by Generative AI";
-  font-size: 10px;
-  color: #888;
-  margin-top: 2px;
-  font-weight: normal;
-}
-
-/* Chatbot Positioning - MOVED TO RIGHT TO AVOID OVERLAP */
-/* Note: When using bootstrap.js, df-messenger-chat-bubble might behave differently. 
-   We stick to standard df-messenger z-index. */
-df-messenger-chat-bubble {
-  /* No custom positioning here to avoid fighting the main tag */
-}
-
+/* Collapsible Sections */
 details {
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);

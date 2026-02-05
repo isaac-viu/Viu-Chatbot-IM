@@ -245,7 +245,28 @@ function injectCustomUI() {
     }
 
 
-    console.log('[UI Debug] FOUND chatWindow!');
+    // 1. Try finding chat-window in Light DOM (direct children)
+    let chatWindow = df.querySelector('df-messenger-chat-window');
+
+    // 2. If not in Light DOM, try Shadow DOM (fallback)
+    if (!chatWindow) {
+      chatWindow = df.shadowRoot.querySelector('df-messenger-chat-window');
+    }
+
+    // 3. Try finding via Bubble (Light or Shadow)
+    if (!chatWindow) {
+      const bubble = df.querySelector('df-messenger-chat-bubble') || df.shadowRoot.querySelector('df-messenger-chat-bubble');
+      if (bubble) {
+        chatWindow = bubble.shadowRoot?.querySelector('df-messenger-chat-window');
+      }
+    }
+
+    if (!chatWindow) {
+      console.log('[UI Debug] <df-messenger-chat-window> not found in Light DOM or Shadow DOM.');
+      return false;
+    }
+
+    console.log('[UI Debug] FOUND chatWindow! (Tag: ' + chatWindow.tagName + ')');
 
     // 1. Inject Header Elements (Logo + Subtitle)
     const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');

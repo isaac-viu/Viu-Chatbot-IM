@@ -165,7 +165,8 @@ async function buildParams() {
 
     // extra context params
     device: $('deviceType').value,
-    pageUrl: location.href
+    pageUrl: location.href,
+    messageCount: parseInt(sessionStorage.getItem('messageCount') || 0)
   };
 
   // region: omit entirely if simulate is enabled
@@ -215,10 +216,19 @@ function updateStatsDisplay() {
   $('messageCountDisplay').textContent = sessionStorage.getItem('messageCount') || 0;
 }
 
-function incrementMessageCount() {
+async function incrementMessageCount() {
   let count = parseInt(sessionStorage.getItem('messageCount') || 0) + 1;
   sessionStorage.setItem('messageCount', count);
   updateStatsDisplay();
+
+  // Sync new count to Dialogflow context for the NEXT message
+  const df = getDf();
+  if (df) {
+    const params = await buildParams();
+    df.setQueryParameters({ parameters: params });
+    console.log('[UI] Message count synced:', count);
+  }
+  renderOut(); // Update UI preview
 }
 
 function incrementSessionCount() {

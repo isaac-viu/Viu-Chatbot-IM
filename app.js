@@ -384,7 +384,7 @@ window.addEventListener('df-messenger-loaded', async () => {
     console.log('[Init] Early parameters set on load');
 
     // Start polling for UI elements
-    startInjectionPoller();
+    // startInjectionPoller();
   }
 });
 
@@ -421,7 +421,7 @@ window.addEventListener('df-chat-open-changed', async (e) => {
       console.log('[UI] "Hi" query sent on open');
 
       // Re-run injection in case of re-render
-      startInjectionPoller();
+      // startInjectionPoller();
     }
   }
 });

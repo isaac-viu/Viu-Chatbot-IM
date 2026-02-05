@@ -244,25 +244,6 @@ function injectCustomUI() {
       return false;
     }
 
-    // DEBUG: Inspect structure
-    const shadowHTML = df.shadowRoot.innerHTML;
-    // Log the first 500 chars to see what child tags exist
-    console.log('[UI Debug] Shadow Root InnerHTML (first 500 chars):', shadowHTML.substring(0, 500));
-
-    // Retry chain to find the chat window in Shadow DOM
-    const bubble = df.shadowRoot.querySelector('df-messenger-chat-bubble');
-    if (!bubble) console.log('[UI Debug] <df-messenger-chat-bubble> not found in df.shadowRoot');
-
-    // Try finding window directly or via bubble
-    let chatWindow = df.shadowRoot.querySelector('df-messenger-chat-window');
-    if (!chatWindow && bubble && bubble.shadowRoot) {
-      chatWindow = bubble.shadowRoot.querySelector('df-messenger-chat-window');
-    }
-
-    if (!chatWindow) {
-      console.log('[UI Debug] <df-messenger-chat-window> not found. (Bubble exists: ' + !!bubble + ')');
-      return false;
-    }
 
     console.log('[UI Debug] FOUND chatWindow!');
 

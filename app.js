@@ -228,138 +228,6 @@ function incrementSessionCount() {
 }
 // -------------------
 
-// --- UI Injection Logic ---
-function injectCustomUI() {
-  try {
-    // FIX: Use querySelector because the element tag is df-messenger, but it might not have ID="df-messenger"
-    const df = document.querySelector('df-messenger');
-    if (!df) {
-      console.log('[UI Debug] <df-messenger> not found in DOM.');
-      return false;
-    }
-
-    // We need shadowRoot to proceed
-    if (!df.shadowRoot) {
-      console.log('[UI Debug] <df-messenger> has no shadowRoot.');
-      return false;
-    }
-
-
-    // --- ROBUST RECURSIVE SEARCH ---
-    // Helper to find valid chat window across Light/Shadow/Slots
-    function findChatWindowRecursive(root) {
-      if (!root) return null;
-
-      // Check current
-      if (root.tagName && root.tagName.toLowerCase() === 'df-messenger-chat-window') {
-        return root;
-      }
-
-      // Search children (Recursive)
-      const children = [];
-      if (root.children) children.push(...root.children);
-      if (root.shadowRoot && root.shadowRoot.children) children.push(...root.shadowRoot.children);
-
-      for (let child of children) {
-        const found = findChatWindowRecursive(child);
-        if (found) return found;
-      }
-
-      return null;
-    }
-
-    // Execute Search starting from various entry points
-    let chatWindow = findChatWindowRecursive(df);
-
-    if (!chatWindow) {
-      console.log('[UI Debug] <df-messenger-chat-window> not found via Recursive Search.');
-      return false;
-    }
-
-    console.log('[UI Debug] FOUND chatWindow via Recursive Search! (Tag: ' + chatWindow.tagName + ')');
-
-    // 1. Inject Header Elements (Logo + Subtitle)
-    const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');
-
-    if (header) {
-      // 0. Inject Logo
-      if (!header.querySelector('.custom-logo')) {
-        const logo = document.createElement('img');
-        logo.className = 'custom-logo';
-        logo.src = 'https://viu.com/favicon.ico';
-        logo.style.height = '24px';
-        logo.style.width = '24px';
-        logo.style.marginRight = '12px';
-        header.insertBefore(logo, header.firstChild);
-        console.log('[UI] Logo injected');
-      }
-
-      // 1. Inject Subtitle
-      if (!header.querySelector('.custom-subtitle')) {
-        const subtitle = document.createElement('div');
-        subtitle.className = 'custom-subtitle';
-        subtitle.textContent = 'Powered by Generative AI';
-        subtitle.style.fontSize = '10px';
-        subtitle.style.opacity = '0.7';
-        subtitle.style.marginTop = '2px';
-        subtitle.style.fontWeight = '400';
-        subtitle.style.flexBasis = '100%';
-        subtitle.style.paddingLeft = '36px';
-        header.appendChild(subtitle);
-        console.log('[UI] Subtitle injected');
-      }
-    } else {
-      console.log('[UI Debug] Header class not found in chatWindow.shadowRoot');
-      // List classes found to help debug
-      if (chatWindow.shadowRoot) {
-        const allTags = Array.from(chatWindow.shadowRoot.querySelectorAll('*')).map(e => e.tagName.toLowerCase() + '.' + e.className).join(', ');
-        console.log('[UI Debug] Tags found in chatWindow: ' + allTags.slice(0, 200) + '...');
-      }
-    }
-
-    // 2. Force Timestamps & Layout
-    if (!chatWindow.shadowRoot.querySelector('#custom-styles')) {
-      const style = document.createElement('style');
-      style.id = 'custom-styles';
-      style.textContent = `
-        .message-list .message .time { display: block !important; opacity: 0.7; font-size: 10px; margin-top: 4px; }
-        .chat-wrapper > .chat-header { 
-           display: flex !important;
-           flex-flow: row wrap !important; 
-           align-items: center !important; 
-           justify-content: flex-start !important;
-           padding: 16px !important;
-           min-height: 60px;
-        }
-        /* Hide default icon inside header if it interferes */
-        .chat-wrapper > .chat-header > .icon { display: none; }
-      `;
-      chatWindow.shadowRoot.appendChild(style);
-      console.log('[UI] Custom styles injected');
-    }
-
-    return true; // Success
-
-  } catch (e) {
-    console.log('[UI] Injection failed exception:', e);
-    return false;
-  }
-}
-
-// Polling helper
-function startInjectionPoller() {
-  let attempts = 0;
-  const interval = setInterval(() => {
-    attempts++;
-    const success = injectCustomUI();
-    if (success || attempts > 20) {
-      clearInterval(interval);
-      if (!success) console.log('[UI] Giving up on injection after 20 attempts');
-    }
-  }, 500);
-}
-// --------------------------
-
 window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
 
@@ -382,8 +250,6 @@ window.addEventListener('df-messenger-loaded', async () => {
     const params = await buildParams();
     df.setQueryParameters({ parameters: params });
     console.log('[Init] Early parameters set on load');
-
-    // Start polling for UI elements
   }
 });
 
@@ -418,8 +284,6 @@ window.addEventListener('df-chat-open-changed', async (e) => {
 
       welcomeSent = true;
       console.log('[UI] "Hi" query sent on open');
-
-      // Re-run injection in case of re-render
     }
   }
 });

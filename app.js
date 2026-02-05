@@ -261,7 +261,15 @@ function injectCustomUI() {
       style.id = 'custom-styles';
       style.textContent = `
         .message-list .message .time { display: block !important; opacity: 0.7; font-size: 10px; margin-top: 4px; }
-        .chat-wrapper > .chat-header { flex-direction: column; align-items: flex-start; justify-content: center; padding-left: 16px; min-height: 60px; }
+        .chat-wrapper > .chat-header { 
+           display: flex !important;
+           flex-flow: row wrap !important; 
+           align-items: center !important; 
+           justify-content: flex-start !important;
+           padding: 16px !important;
+           min-height: 60px;
+        }
+        .chat-wrapper > .chat-header > .icon { display: none; }
       `;
       chatWindow.shadowRoot.appendChild(style);
       console.log('[UI] Injected custom shadow styles');

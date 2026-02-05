@@ -318,7 +318,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const agentId = oldDf.getAttribute('agent-id');
     const langCode = oldDf.getAttribute('language-code');
     // const gcsUpload = oldDf.getAttribute('gcs-upload'); // Deprecated
-    const chatTitle = $('df-messenger-chat-bubble')?.getAttribute('chat-title') || "Viu Services Bot"; // Fallback if bubble missing
+
+    // Capture Bubble Attributes
+    const oldBubble = $('df-messenger-chat-bubble');
+    const chatTitle = oldBubble?.getAttribute('chat-title') || "Viu Services Bot";
+    const chatIcon = oldBubble?.getAttribute('chat-icon') || "https://viu.com/favicon.ico"; // Safe Fallback
 
     console.log('[UI] Performing Hard Reset (Re-mounting component)...');
 
@@ -356,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Re-create the bubble inside
       const bubble = document.createElement('df-messenger-chat-bubble');
       bubble.setAttribute('chat-title', chatTitle);
+      bubble.setAttribute('chat-icon', chatIcon); // Fixed: Restore Icon
       bubble.setAttribute('anchor', 'top-left');
       bubble.setAttribute('allow-fullscreen', 'small');
 

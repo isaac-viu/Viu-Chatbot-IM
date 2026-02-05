@@ -231,12 +231,14 @@ function incrementSessionCount() {
 // --- UI Injection Logic ---
 function injectCustomUI() {
   try {
-    const df = $('df-messenger');
+    // FIX: Use querySelector because the element tag is df-messenger, but it might not have ID="df-messenger"
+    const df = document.querySelector('df-messenger');
     if (!df) {
       console.log('[UI Debug] <df-messenger> not found in DOM.');
       return false;
     }
 
+    // We need shadowRoot to proceed
     if (!df.shadowRoot) {
       console.log('[UI Debug] <df-messenger> has no shadowRoot.');
       return false;

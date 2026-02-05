@@ -232,43 +232,53 @@ function incrementSessionCount() {
 function injectCustomUI() {
   try {
     const df = $('df-messenger');
-    const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
-    const chatWindow = bubble?.shadowRoot?.querySelector('df-messenger-chat-window') || df.shadowRoot?.querySelector('df-messenger-chat-window');
+    if (!df) return false;
 
-    if (!chatWindow) return;
+    // Retry chain to find the chat window in Shadow DOM
+    const bubble = df.shadowRoot?.querySelector('df-messenger-chat-bubble');
+    const chatWindow = bubble?.shadowRoot?.querySelector('df-messenger-chat-window')
+      || df.shadowRoot?.querySelector('df-messenger-chat-window');
+
+    if (!chatWindow) {
+      console.log('[UI] Chat Window not found yet...');
+      return false;
+    }
 
     // 1. Inject Header Elements (Logo + Subtitle)
     const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');
 
-    // 0. Inject Logo
-    if (header && !header.querySelector('.custom-logo')) {
-      const logo = document.createElement('img');
-      logo.className = 'custom-logo';
-      // Placeholder logo (User can edit this URL)
-      logo.src = 'https://viu.com/favicon.ico';
-      logo.style.height = '24px';
-      logo.style.width = '24px';
-      logo.style.marginRight = '12px';
-      header.insertBefore(logo, header.firstChild);
+    if (header) {
+      // 0. Inject Logo
+      if (!header.querySelector('.custom-logo')) {
+        const logo = document.createElement('img');
+        logo.className = 'custom-logo';
+        logo.src = 'https://viu.com/favicon.ico';
+        logo.style.height = '24px';
+        logo.style.width = '24px';
+        logo.style.marginRight = '12px';
+        header.insertBefore(logo, header.firstChild);
+        console.log('[UI] Logo injected');
+      }
+
+      // 1. Inject Subtitle
+      if (!header.querySelector('.custom-subtitle')) {
+        const subtitle = document.createElement('div');
+        subtitle.className = 'custom-subtitle';
+        subtitle.textContent = 'Powered by Generative AI';
+        subtitle.style.fontSize = '10px';
+        subtitle.style.opacity = '0.7';
+        subtitle.style.marginTop = '2px';
+        subtitle.style.fontWeight = '400';
+        subtitle.style.flexBasis = '100%';
+        subtitle.style.paddingLeft = '36px';
+        header.appendChild(subtitle);
+        console.log('[UI] Subtitle injected');
+      }
+    } else {
+      console.log('[UI] Header not found in chat window');
     }
 
-    // 1. Inject Subtitle
-    if (header && !header.querySelector('.custom-subtitle')) {
-      const subtitle = document.createElement('div');
-      subtitle.className = 'custom-subtitle';
-      subtitle.textContent = 'Powered by Generative AI';
-      subtitle.style.fontSize = '10px';
-      subtitle.style.opacity = '0.7';
-      subtitle.style.marginTop = '2px';
-      subtitle.style.fontWeight = '400';
-      // Force subtitle to break to new line in flex container
-      subtitle.style.flexBasis = '100%';
-      subtitle.style.paddingLeft = '36px'; // Align with text
-      header.appendChild(subtitle);
-      console.log('[UI] Injected custom subtitle');
-    }
-
-    // 2. Force Timestamps & Layout (Standard Header Style)
+    // 2. Force Timestamps & Layout
     if (!chatWindow.shadowRoot.querySelector('#custom-styles')) {
       const style = document.createElement('style');
       style.id = 'custom-styles';
@@ -286,12 +296,28 @@ function injectCustomUI() {
         .chat-wrapper > .chat-header > .icon { display: none; }
       `;
       chatWindow.shadowRoot.appendChild(style);
-      console.log('[UI] Injected custom shadow styles');
+      console.log('[UI] Custom styles injected');
     }
+
+    return true; // Success
 
   } catch (e) {
     console.log('[UI] Injection failed:', e);
+    return false;
   }
+}
+
+// Polling helper
+function startInjectionPoller() {
+  let attempts = 0;
+  const interval = setInterval(() => {
+    attempts++;
+    const success = injectCustomUI();
+    if (success || attempts > 20) { // Try for 10 seconds (20 * 500ms)
+      clearInterval(interval);
+      if (!success) console.log('[UI] Giving up on injection after 20 attempts');
+    }
+  }, 500);
 }
 // --------------------------
 
@@ -318,8 +344,8 @@ window.addEventListener('df-messenger-loaded', async () => {
     df.setQueryParameters({ parameters: params });
     console.log('[Init] Early parameters set on load');
 
-    // Inject UI customizations
-    setTimeout(injectCustomUI, 1000);
+    // Start polling for UI elements
+    startInjectionPoller();
   }
 });
 
@@ -356,7 +382,7 @@ window.addEventListener('df-chat-open-changed', async (e) => {
       console.log('[UI] "Hi" query sent on open');
 
       // Re-run injection in case of re-render
-      setTimeout(injectCustomUI, 500);
+      startInjectionPoller();
     }
   }
 });

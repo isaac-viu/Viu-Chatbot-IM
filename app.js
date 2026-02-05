@@ -245,28 +245,38 @@ function injectCustomUI() {
     }
 
 
-    // 1. Try finding chat-window in Light DOM (direct children)
-    let chatWindow = df.querySelector('df-messenger-chat-window');
+    // --- ROBUST RECURSIVE SEARCH ---
+    // Helper to find valid chat window across Light/Shadow/Slots
+    function findChatWindowRecursive(root) {
+      if (!root) return null;
 
-    // 2. If not in Light DOM, try Shadow DOM (fallback)
-    if (!chatWindow) {
-      chatWindow = df.shadowRoot.querySelector('df-messenger-chat-window');
-    }
-
-    // 3. Try finding via Bubble (Light or Shadow)
-    if (!chatWindow) {
-      const bubble = df.querySelector('df-messenger-chat-bubble') || df.shadowRoot.querySelector('df-messenger-chat-bubble');
-      if (bubble) {
-        chatWindow = bubble.shadowRoot?.querySelector('df-messenger-chat-window');
+      // Check current
+      if (root.tagName && root.tagName.toLowerCase() === 'df-messenger-chat-window') {
+        return root;
       }
+
+      // Search children (Recursive)
+      const children = [];
+      if (root.children) children.push(...root.children);
+      if (root.shadowRoot && root.shadowRoot.children) children.push(...root.shadowRoot.children);
+
+      for (let child of children) {
+        const found = findChatWindowRecursive(child);
+        if (found) return found;
+      }
+
+      return null;
     }
 
+    // Execute Search starting from various entry points
+    let chatWindow = findChatWindowRecursive(df);
+
     if (!chatWindow) {
-      console.log('[UI Debug] <df-messenger-chat-window> not found in Light DOM or Shadow DOM.');
+      console.log('[UI Debug] <df-messenger-chat-window> not found via Recursive Search.');
       return false;
     }
 
-    console.log('[UI Debug] FOUND chatWindow! (Tag: ' + chatWindow.tagName + ')');
+    console.log('[UI Debug] FOUND chatWindow via Recursive Search! (Tag: ' + chatWindow.tagName + ')');
 
     // 1. Inject Header Elements (Logo + Subtitle)
     const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');

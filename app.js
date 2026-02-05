@@ -237,25 +237,38 @@ function injectCustomUI() {
 
     if (!chatWindow) return;
 
-    // 1. Inject Subtitle
-    // We look for the header element inside the chat window
+    // 1. Inject Header Elements (Logo + Subtitle)
     const header = chatWindow.shadowRoot?.querySelector('.chat-wrapper > .chat-header') || chatWindow.shadowRoot?.querySelector('.header');
 
-    // Avoid double injection
+    // 0. Inject Logo
+    if (header && !header.querySelector('.custom-logo')) {
+      const logo = document.createElement('img');
+      logo.className = 'custom-logo';
+      // Placeholder logo (User can edit this URL)
+      logo.src = 'https://viu.com/favicon.ico';
+      logo.style.height = '24px';
+      logo.style.width = '24px';
+      logo.style.marginRight = '12px';
+      header.insertBefore(logo, header.firstChild);
+    }
+
+    // 1. Inject Subtitle
     if (header && !header.querySelector('.custom-subtitle')) {
       const subtitle = document.createElement('div');
       subtitle.className = 'custom-subtitle';
       subtitle.textContent = 'Powered by Generative AI';
       subtitle.style.fontSize = '10px';
-      subtitle.style.opacity = '0.8';
-      subtitle.style.marginTop = '-4px';
+      subtitle.style.opacity = '0.7';
+      subtitle.style.marginTop = '2px';
       subtitle.style.fontWeight = '400';
+      // Force subtitle to break to new line in flex container
+      subtitle.style.flexBasis = '100%';
+      subtitle.style.paddingLeft = '36px'; // Align with text
       header.appendChild(subtitle);
       console.log('[UI] Injected custom subtitle');
     }
 
-    // 2. Force Timestamps (Global Style Injection into Shadow DOM)
-    // We inject a style tag into the chat window's shadow root
+    // 2. Force Timestamps & Layout (Standard Header Style)
     if (!chatWindow.shadowRoot.querySelector('#custom-styles')) {
       const style = document.createElement('style');
       style.id = 'custom-styles';
@@ -269,6 +282,7 @@ function injectCustomUI() {
            padding: 16px !important;
            min-height: 60px;
         }
+        /* Hide default icon inside header if it interferes */
         .chat-wrapper > .chat-header > .icon { display: none; }
       `;
       chatWindow.shadowRoot.appendChild(style);
@@ -285,12 +299,6 @@ window.addEventListener('df-messenger-loaded', async () => {
   console.log('[debug] df-messenger-loaded');
 
   // Track Session Count (Lifetime)
-  // We only increment if this is a "clean load" or hard reset, but df-messenger-loaded fires on every refresh.
-  // For simplicity, we treat every load as a session start/continuation.
-  // To avoid double counting on simple refreshes, we could use session cookies, but user asked for "Count".
-  // Let's increment on load for now, assuming "Load = Session".
-  // actually, safer to just display current state here, and increment only on explicit "New Session" or first visit.
-  // Let's count "Loads" as "Sessions" for this POC.
   if (!sessionStorage.getItem('sessionInitialized')) {
     incrementSessionCount();
     sessionStorage.setItem('sessionInitialized', 'true');
